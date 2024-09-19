@@ -15,3 +15,10 @@ Próximos Passos
  - Documentar a API: À medida que desenvolvemos a API, documentamos cada endpoint, parâmetro de entrada, formato de resposta e código de status HTTP. 
 
  - Realizar testes: realizaremos testes abrangentes em sua API para garantir sua estabilidade, segurança e desempenho. Isso inclui testes de unidade, testes de integração e testes de aceitação para cobrir todos os aspectos do sistema.
+
+ - Criar as telas que o usuario fará a interação.
+
+ - Testar as telas, com o fluxo de sucesso e falha.
+
+ - Hospedar todos os serviços na AWS
+   
