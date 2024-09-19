@@ -14,4 +14,4 @@ Próximos Passos
  
  - Documentar a API: À medida que desenvolvemos a API, documentamos cada endpoint, parâmetro de entrada, formato de resposta e código de status HTTP. 
 
- -Realizar testes: realizaremos testes abrangentes em sua API para garantir sua estabilidade, segurança e desempenho. Isso inclui testes de unidade, testes de integração e testes de aceitação para cobrir todos os aspectos do sistema.
+ - Realizar testes: realizaremos testes abrangentes em sua API para garantir sua estabilidade, segurança e desempenho. Isso inclui testes de unidade, testes de integração e testes de aceitação para cobrir todos os aspectos do sistema.
