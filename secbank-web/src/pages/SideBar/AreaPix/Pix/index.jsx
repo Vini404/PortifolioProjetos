@@ -348,7 +348,7 @@ const Pix = () => {
                                                 </div>
                                                 <div className="dados-space">
                                                     <label style={{ color: "#3f3d56" }}>Instituição:</label>
-                                                    <label style={{ color: "#3f3d56" }}>Orion Bank S.A.</label>
+                                                    <label style={{ color: "#3f3d56" }}>Sec Bank S.A.</label>
                                                 </div>
                                                 <div className="dados-space">
                                                     <label style={{ color: "#3f3d56" }}>Chave Pix:</label>
@@ -445,7 +445,7 @@ const Pix = () => {
                                                 </div>
                                                 <div className="dados-space">
                                                     <label style={{ color: "#3f3d56" }}>Instituição:</label>
-                                                    <label style={{ color: "#3f3d56" }}>Orion Bank S.A.</label>
+                                                    <label style={{ color: "#3f3d56" }}>Sec Bank S.A.</label>
                                                 </div>
                                                 <div className="dados-space">
                                                     <label style={{ color: "#3f3d56" }}>Chave Pix:</label>
@@ -532,7 +532,7 @@ const Pix = () => {
                                                 </div>
                                                 <div className="dados-space">
                                                     <label style={{ color: "#3f3d56" }}>Instituição:</label>
-                                                    <label style={{ color: "#3f3d56" }}>Orion Bank S.A.</label>
+                                                    <label style={{ color: "#3f3d56" }}>Sec Bank S.A.</label>
                                                 </div>
                                                 <div className="dados-space">
                                                     <label style={{ color: "#3f3d56" }}>Chave Pix:</label>
