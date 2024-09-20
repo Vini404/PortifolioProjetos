@@ -1,6 +1,8 @@
 Link do jira
 https://vinicius404contato.atlassian.net/jira/software/projects/KAN/boards/1
 
+Documentacao projeto
+https://docs.google.com/document/d/1AeelOUNOvP2w6HsS2eKgI7cAAiHZCiyJhWVQXPQtByQ/edit
 
 Repositorio base Golang api
 https://github.com/irahardianto/service-pattern-go/blob/master/
