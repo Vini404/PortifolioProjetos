@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"secbank.api/internal/interfaces"
+	"secbank.api/interfaces"
 )
 
 type CustomerController struct {
