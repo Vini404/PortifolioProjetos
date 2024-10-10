@@ -1,9 +1,9 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/joho/godotenv/autoload"
 	"os"
 )
@@ -18,11 +18,7 @@ type Service interface {
 	// It returns an error if the connection cannot be closed.
 	Close() error
 
-	NewConnection() *sql.DB
-}
-
-type service struct {
-	db *sql.DB
+	NewConnection() *sqlx.DB
 }
 
 var (
@@ -34,9 +30,9 @@ var (
 	schema   = os.Getenv("DB_SCHEMA")
 )
 
-func NewConnection() *sql.DB {
+func NewConnection() *sqlx.DB {
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
-	db, err := sql.Open("pgx", connStr)
+	db, err := sqlx.Open("pgx", connStr)
 
 	if err != nil {
 		panic(err)

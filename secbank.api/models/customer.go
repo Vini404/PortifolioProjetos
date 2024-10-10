@@ -3,11 +3,11 @@ package models
 import "time"
 
 type Customer struct {
-	ID               int
-	FullName         string
-	Phone            string
-	Email            string
-	Birthday         time.Time
-	CreatedTimeStamp time.Time
-	UpdatedTimeStamp time.Time
+	ID               int       `db:"id"`
+	FullName         string    `db:"fullname"`
+	Phone            string    `db:"phone"`
+	Email            string    `db:"email"`
+	Birthday         time.Time `db:"birthday"`
+	CreatedTimeStamp time.Time `db:"createdtimestamp"`
+	UpdatedTimeStamp time.Time `db:"updatedtimestamp"`
 }

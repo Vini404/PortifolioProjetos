@@ -1,7 +1,13 @@
 package interfaces
 
-import "secbank.api/models"
+import (
+	"secbank.api/models"
+)
 
 type ICustomerRepository interface {
-	ListAllCustomer() (*[]models.Customer, error)
+	R_List() (*[]models.Customer, error)
+	R_Create(customer *models.Customer) error
+	R_Update(customer models.Customer) error
+	R_Delete(id int) error
+	R_Get(id int) (*models.Customer, error)
 }

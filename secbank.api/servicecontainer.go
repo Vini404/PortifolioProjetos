@@ -16,7 +16,7 @@ type IServiceContainer interface {
 type kernel struct{}
 
 func (k *kernel) InjectPlayerController() controllers.CustomerController {
-	sqliteHandler := &infrastructures.SQLiteHandler{}
+	sqliteHandler := &infrastructures.SQLHandler{}
 	sqliteHandler.Conn = database.NewConnection()
 
 	customerRepository := &repositories.CustomerRepository{sqliteHandler}

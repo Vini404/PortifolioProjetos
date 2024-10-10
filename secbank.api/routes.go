@@ -16,7 +16,12 @@ func (router *router) InitRouter() *chi.Mux {
 	customerController := ServiceContainer().InjectPlayerController()
 
 	r := chi.NewRouter()
-	r.HandleFunc("/list", customerController.ListCustomers)
+
+	r.Get("/customer", customerController.List)
+	r.Get("/customer/{id}", customerController.Get)
+	r.Post("/customer", customerController.Create)
+	r.Put("/customer", customerController.Update)
+	r.Delete("/customer/{id}", customerController.Delete)
 
 	return r
 }
