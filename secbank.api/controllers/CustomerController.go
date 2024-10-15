@@ -6,7 +6,7 @@ import (
 	"github.com/jinzhu/copier"
 	"net/http"
 	"secbank.api/dto/customer"
-	"secbank.api/interfaces"
+	"secbank.api/interfaces/service"
 	"secbank.api/models"
 	"strconv"
 )

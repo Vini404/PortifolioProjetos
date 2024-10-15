@@ -1,21 +1,29 @@
-package main
+package routes
 
 import (
+	"github.com/go-chi/chi"
 	"secbank.api/controllers"
 	"secbank.api/database"
 	"secbank.api/infrastructures"
 	"secbank.api/repositories"
 	"secbank.api/services"
-	"sync"
 )
 
-type IServiceContainer interface {
-	InjectPlayerController() controllers.CustomerController
+type CustomerRoutes struct {
 }
 
-type kernel struct{}
+func (c CustomerRoutes) AddToRouter(r *chi.Mux) {
 
-func (k *kernel) InjectPlayerController() controllers.CustomerController {
+	var customerController = GetCustomerController()
+
+	r.Get("/customer", customerController.List)
+	r.Get("/customer/{id}", customerController.Get)
+	r.Post("/customer", customerController.Create)
+	r.Put("/customer", customerController.Update)
+	r.Delete("/customer/{id}", customerController.Delete)
+}
+
+func GetCustomerController() controllers.CustomerController {
 	sqliteHandler := &infrastructures.SQLHandler{}
 	sqliteHandler.Conn = database.NewConnection()
 
@@ -25,18 +33,4 @@ func (k *kernel) InjectPlayerController() controllers.CustomerController {
 	customerController := controllers.CustomerController{ICustomerService: customerService}
 
 	return customerController
-}
-
-var (
-	k             *kernel
-	containerOnce sync.Once
-)
-
-func ServiceContainer() IServiceContainer {
-	if k == nil {
-		containerOnce.Do(func() {
-			k = &kernel{}
-		})
-	}
-	return k
 }

@@ -2,7 +2,7 @@ package services
 
 import (
 	"fmt"
-	"secbank.api/interfaces"
+	"secbank.api/interfaces/repository"
 	"secbank.api/models"
 )
 

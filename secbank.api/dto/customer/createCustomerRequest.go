@@ -7,4 +7,5 @@ type CreateCustomerRequest struct {
 	Phone    string    `json:"phone"`
 	Email    string    `json:"email"`
 	Birthday time.Time `json:"birthday"`
+	Password string    `json:"password"`
 }
