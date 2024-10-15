@@ -2,9 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-chi/chi"
+	"github.com/jinzhu/copier"
 	"net/http"
+	"secbank.api/dto/customer"
 	"secbank.api/interfaces"
 	"secbank.api/models"
 	"strconv"
@@ -17,31 +18,40 @@ type CustomerController struct {
 func (controller *CustomerController) List(res http.ResponseWriter, req *http.Request) {
 
 	customers, err := controller.S_List()
+
 	if err != nil {
-		fmt.Println(err.Error())
+		SetResponseError(res, err)
+		return
 	}
 
-	json.NewEncoder(res).Encode(customers)
+	SetResponseSuccessWithPayload(res, customers)
 }
 
 func (controller *CustomerController) Create(res http.ResponseWriter, req *http.Request) {
+	var customerRequest dto.CreateCustomerRequest
 	var customer models.Customer
 
 	defer req.Body.Close()
 
 	decoder := json.NewDecoder(req.Body)
 
-	errDecode := decoder.Decode(&customer)
+	errDecode := decoder.Decode(&customerRequest)
+
 	if errDecode != nil {
-		http.Error(res, "Bad request", http.StatusBadRequest)
+		SetResponseError(res, errDecode)
 		return
 	}
+
+	copier.Copy(&customer, &customerRequest)
 
 	errInsert := controller.S_Create(customer)
 
 	if errInsert != nil {
-		http.Error(res, "Bad request", http.StatusBadRequest)
+		SetResponseError(res, errInsert)
+		return
 	}
+
+	SetResponseSuccess(res)
 }
 
 func (controller *CustomerController) Update(res http.ResponseWriter, req *http.Request) {
@@ -51,16 +61,20 @@ func (controller *CustomerController) Update(res http.ResponseWriter, req *http.
 	decoder := json.NewDecoder(req.Body)
 
 	errDecode := decoder.Decode(&customer)
+
 	if errDecode != nil {
-		http.Error(res, "Bad request", http.StatusBadRequest)
+		SetResponseError(res, errDecode)
 		return
 	}
 
 	updateErr := controller.S_Update(customer)
 
 	if updateErr != nil {
-		http.Error(res, "Bad request", http.StatusBadRequest)
+		SetResponseError(res, updateErr)
+		return
 	}
+
+	SetResponseSuccess(res)
 }
 
 func (controller *CustomerController) Get(res http.ResponseWriter, req *http.Request) {
@@ -69,16 +83,17 @@ func (controller *CustomerController) Get(res http.ResponseWriter, req *http.Req
 	idParsed, err := strconv.Atoi(id)
 
 	if err != nil {
-		fmt.Println("Error:", err)
+		SetResponseError(res, err)
 		return
 	}
-	customer, err := controller.S_Get(idParsed)
+	customer, errGet := controller.S_Get(idParsed)
 
-	if err != nil {
-		http.Error(res, "Bad request", http.StatusBadRequest)
+	if errGet != nil {
+		SetResponseError(res, errGet)
+		return
 	}
 
-	json.NewEncoder(res).Encode(customer)
+	SetResponseSuccessWithPayload(res, customer)
 }
 
 func (controller *CustomerController) Delete(res http.ResponseWriter, req *http.Request) {
@@ -87,12 +102,15 @@ func (controller *CustomerController) Delete(res http.ResponseWriter, req *http.
 	idParsed, err := strconv.Atoi(id)
 
 	if err != nil {
-		fmt.Println("Error:", err)
+		SetResponseError(res, err)
 		return
 	}
 	errToDelete := controller.S_Delete(idParsed)
 
 	if errToDelete != nil {
-		http.Error(res, "Bad request", http.StatusBadRequest)
+		SetResponseError(res, errToDelete)
+		return
 	}
+
+	SetResponseSuccess(res)
 }

@@ -6,7 +6,7 @@ import (
 
 type ICustomerRepository interface {
 	R_List() (*[]models.Customer, error)
-	R_Create(customer *models.Customer) error
+	R_Create(customer models.Customer) error
 	R_Update(customer models.Customer) error
 	R_Delete(id int) error
 	R_Get(id int) (*models.Customer, error)

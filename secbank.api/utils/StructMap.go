@@ -1,6 +1,9 @@
 package utils
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 func StructToMap(obj interface{}) map[string]interface{} {
 	// Result map to hold the struct fields and values
@@ -28,4 +31,32 @@ func StructToMap(obj interface{}) map[string]interface{} {
 	}
 
 	return result
+}
+
+func StructToMapWithoutID(entity interface{}, idField string) (map[string]interface{}, error) {
+	entityValue := reflect.ValueOf(entity)
+	entityType := reflect.TypeOf(entity)
+
+	// Ensure the input is a struct
+	if entityType.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("expected a struct, got %s", entityType.Kind().String())
+	}
+
+	result := make(map[string]interface{})
+
+	// Iterate over the struct fields
+	for i := 0; i < entityType.NumField(); i++ {
+		field := entityType.Field(i)
+		fieldValue := entityValue.Field(i)
+
+		// Skip the ID field (if it exists and is set to 0)
+		if field.Tag.Get("db") == idField && fieldValue.Int() == 0 {
+			continue
+		}
+
+		// Add the field to the result map if it's not ID
+		result[field.Tag.Get("db")] = fieldValue.Interface()
+	}
+
+	return result, nil
 }

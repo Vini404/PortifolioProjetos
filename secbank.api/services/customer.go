@@ -12,14 +12,11 @@ type CustomerService struct {
 
 func (service *CustomerService) S_List() (*[]models.Customer, error) {
 	allCustomers, err := service.R_List()
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	return allCustomers, nil
+	return allCustomers, err
 }
 
 func (service *CustomerService) S_Create(customer models.Customer) error {
-	err := service.ICustomerRepository.R_Create(&customer)
+	err := service.ICustomerRepository.R_Create(customer)
 
 	if err != nil {
 		return err

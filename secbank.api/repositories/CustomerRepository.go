@@ -4,6 +4,7 @@ import (
 	"secbank.api/interfaces"
 	"secbank.api/models"
 	"secbank.api/utils"
+	"time"
 )
 
 type CustomerRepository struct {
@@ -23,7 +24,8 @@ func (repository *CustomerRepository) R_List() (*[]models.Customer, error) {
 	return &customers, nil
 }
 
-func (repository *CustomerRepository) R_Create(customer *models.Customer) error {
+func (repository *CustomerRepository) R_Create(customer models.Customer) error {
+	customer.CreatedTimeStamp = time.Now()
 	err := repository.Insert(customer, "customer")
 
 	if err != nil {
@@ -33,6 +35,7 @@ func (repository *CustomerRepository) R_Create(customer *models.Customer) error 
 }
 
 func (repository *CustomerRepository) R_Update(customer models.Customer) error {
+	customer.UpdatedTimeStamp = time.Now()
 	customerToUpdate := utils.StructToMap(customer)
 	err := repository.Update(customer.ID, "customer", customerToUpdate)
 

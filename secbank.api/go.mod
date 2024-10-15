@@ -6,6 +6,7 @@ require (
 	github.com/doug-martin/goqu/v9 v9.19.0
 	github.com/go-chi/chi v1.5.5
 	github.com/jackc/pgx/v5 v5.7.1
+	github.com/jinzhu/copier v0.4.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
 )

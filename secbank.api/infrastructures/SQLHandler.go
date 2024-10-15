@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/doug-martin/goqu/v9"
 	"github.com/jmoiron/sqlx"
+	"secbank.api/utils"
 )
 
 type SQLHandler struct {
@@ -24,7 +25,14 @@ func (handler *SQLHandler) Query(statement string, dest interface{}) error {
 
 func (handler *SQLHandler) Insert(entity interface{}, tableName string) error {
 	dialect := goqu.Dialect("postgres")
-	insert := dialect.Insert(tableName).Rows(entity)
+
+	entityWithoutID, err := utils.StructToMapWithoutID(entity, "id")
+
+	if err != nil {
+		return err
+	}
+
+	insert := dialect.Insert(tableName).Rows(entityWithoutID)
 
 	sql, args, err := insert.ToSQL()
 

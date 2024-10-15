@@ -22,7 +22,7 @@ func (k *kernel) InjectPlayerController() controllers.CustomerController {
 	customerRepository := &repositories.CustomerRepository{sqliteHandler}
 
 	customerService := &services.CustomerService{customerRepository}
-	customerController := controllers.CustomerController{customerService}
+	customerController := controllers.CustomerController{ICustomerService: customerService}
 
 	return customerController
 }
