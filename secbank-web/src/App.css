@@ -36,3 +36,16 @@
     transform: rotate(360deg);
   }
 }
+
+body {
+  background-color: #f4f4f4;
+}
+
+.MuiDrawer-paper {
+  background-color: #1a237e;
+  color: white;
+}
+
+.MuiListItemIcon-root {
+  color: white;
+}

@@ -1,46 +1,52 @@
 import React from 'react';
-import AppRoutes from './routes/AppRoutes';
-import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
-import { ToastContainer } from 'react-toastify';
-import { AuthProvider } from "./contexts/AuthContext";
-import { SolicitacoesContaProvider } from "./contexts/SolicitacoesContaContext";
-import { BuscarCEPProvider } from "./contexts/BuscarCEPContext";
-import { RecuperarSenhaProvider } from "./contexts/RecuperarSenhaContext";
-import { ContaProvider } from "./contexts/ContaContext";
-import { ChaveProvider } from "./contexts/ChaveContext";
-import { QRCodeProvider } from "./contexts/QRCodeContext";
-import { MovimentoProvider } from "./contexts/MovimentoContext";
-import { BrowserRouter as Router } from "react-router-dom";
-import 'react-toastify/dist/ReactToastify.css';
-import './App.css';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
 
-function App() {
+import RegisterPage from './pages/RegisterPage';
+
+import TransferPage from './pages/TransferPage';
+import PasswordRecoveryPage from './pages/PasswordRecoveryPage';
+import AccountMannager from './pages/AccountManager';
+import UserProfileEdit from './pages/UserProfileEdit';
+import Extract from './pages/Extract';
+import Home from './pages/Home';
+
+
+
+// Definindo o tema do Material-UI
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#3f51b5', // Azul
+    },
+    secondary: {
+      main: '#f50057', // Rosa
+    },
+  },
+});
+
+const App = () => {
   return (
-    <div className="App">
-      <Router>
-        <ErrorBoundary>
-          <RecuperarSenhaProvider>
-            <SolicitacoesContaProvider>
-              <BuscarCEPProvider>
-                <AuthProvider>
-                  <ContaProvider>
-                    <ChaveProvider>
-                      <MovimentoProvider>
-                        <QRCodeProvider>
-                          <AppRoutes />
-                          <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} />
-                        </QRCodeProvider>
-                      </MovimentoProvider>
-                    </ChaveProvider>
-                  </ContaProvider>
-                </AuthProvider>
-              </BuscarCEPProvider>
-            </SolicitacoesContaProvider>
-          </RecuperarSenhaProvider>
-        </ErrorBoundary>
-      </Router>
-    </div>
+    
+    <ThemeProvider theme={theme}>
+    <Router>
+    <Routes>
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/transfer" element={<TransferPage />} />
+      <Route path="/passwordRecovery" element={<PasswordRecoveryPage />} />
+      <Route path="/account" element={<AccountMannager/>} />
+      <Route path="/user/edit" element={<UserProfileEdit/>} />
+      <Route path="/extract" element={<Extract/>} />
+      <Route path="/home" element={<Home/>} />
+
+    </Routes>
+  </Router>
+  </ThemeProvider>
   );
-}
+};
 
 export default App;
