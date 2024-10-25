@@ -14,7 +14,6 @@ type router struct{}
 
 func (router *router) InitRouter() *chi.Mux {
 	r := chi.NewRouter()
-
 	routes.CustomerRoutes{}.AddToRouter(r)
 	routes.AccountRoutes{}.AddToRouter(r)
 

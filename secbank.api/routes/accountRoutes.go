@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/go-chi/chi"
+	"secbank.api/auth"
 	"secbank.api/controllers"
 	"secbank.api/database"
 	"secbank.api/infrastructures"
@@ -16,11 +17,11 @@ func (c AccountRoutes) AddToRouter(r *chi.Mux) {
 
 	var accountController = GetAccountController()
 
-	r.Get("/account", accountController.List)
-	r.Get("/account/{id}", accountController.Get)
-	r.Post("/account", accountController.Create)
-	r.Put("/account", accountController.Update)
-	r.Delete("/account/{id}", accountController.Delete)
+	r.With(auth.AuthMiddleware).Get("/account", accountController.List)
+	r.With(auth.AuthMiddleware).Get("/account/{id}", accountController.Get)
+	r.With(auth.AuthMiddleware).Post("/account", accountController.Create)
+	r.With(auth.AuthMiddleware).Put("/account", accountController.Update)
+	r.With(auth.AuthMiddleware).Delete("/account/{id}", accountController.Delete)
 }
 
 func GetAccountController() controllers.AccountController {

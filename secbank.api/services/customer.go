@@ -1,7 +1,10 @@
 package services
 
 import (
+	"errors"
 	"fmt"
+	"secbank.api/auth"
+	dto "secbank.api/dto/customer"
 	"secbank.api/interfaces/repository"
 	"secbank.api/models"
 )
@@ -50,4 +53,28 @@ func (service *CustomerService) S_Get(id int) (*models.Customer, error) {
 		return nil, err
 	}
 	return customer, nil
+}
+
+func (service *CustomerService) S_Auth(request dto.AuthRequest) (*dto.AuthResponse, error) {
+	customer, err := service.ICustomerRepository.R_Get_By_Email(request.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if customer == nil {
+		return nil, errors.New("Usuario não encontrado")
+	}
+
+	if customer.Password != request.Password {
+		return nil, errors.New("Usuario ou senha incorreta.")
+	}
+
+	token, err := auth.GenerateJWT(customer.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.AuthResponse{Token: token}, nil
 }

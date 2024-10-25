@@ -10,4 +10,5 @@ type ICustomerRepository interface {
 	R_Update(customer models.Customer) error
 	R_Delete(id int) error
 	R_Get(id int) (*models.Customer, error)
+	R_Get_By_Email(email string) (*models.Customer, error)
 }

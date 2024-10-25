@@ -16,9 +16,9 @@ func (handler *SQLHandler) Execute(statement string) {
 	handler.Conn.Exec(statement)
 }
 
-func (handler *SQLHandler) Query(statement string, dest interface{}) error {
+func (handler *SQLHandler) Query(statement string, dest interface{}, args ...interface{}) error {
 
-	err := handler.Conn.Select(dest, statement)
+	err := handler.Conn.Select(dest, statement, args)
 
 	return err
 }

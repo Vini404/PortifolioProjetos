@@ -1,11 +1,7 @@
 package dto
 
-import "time"
-
 type CreateAccountRequest struct {
-	FullName string    `json:"fullname"`
-	Phone    string    `json:"phone"`
-	Email    string    `json:"email"`
-	Birthday time.Time `json:"birthday"`
-	Password string    `json:"password"`
+	IDAccountHolder int    `db:"id_account_holder"`
+	Number          string `db:"number"`
+	Digit           string `db:"digit"`
 }

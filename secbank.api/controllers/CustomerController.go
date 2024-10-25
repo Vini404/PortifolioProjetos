@@ -15,6 +15,31 @@ type CustomerController struct {
 	interfaces.ICustomerService
 }
 
+func (controller *CustomerController) Auth(res http.ResponseWriter, req *http.Request) {
+	var authRequest dto.AuthRequest
+
+	defer req.Body.Close()
+
+	decoder := json.NewDecoder(req.Body)
+
+	errDecode := decoder.Decode(&authRequest)
+
+	if errDecode != nil {
+		SetResponseError(res, errDecode)
+		return
+	}
+
+	token, err := controller.S_Auth(authRequest)
+
+	if err != nil {
+		SetResponseError(res, err)
+		return
+	}
+
+	SetResponseSuccessWithPayload(res, token)
+
+}
+
 func (controller *CustomerController) List(res http.ResponseWriter, req *http.Request) {
 
 	customers, err := controller.S_List()
