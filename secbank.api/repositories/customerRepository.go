@@ -68,7 +68,7 @@ func (repository *CustomerRepository) R_Get(id int) (*models.Customer, error) {
 func (repository *CustomerRepository) R_Get_By_Email(email string) (*models.Customer, error) {
 	customer := models.Customer{}
 
-	err := repository.Query("SELECT * FROM Customer WHERE email=$1", &customer, email)
+	err := repository.QueryWithParamSingleRow("SELECT * FROM Customer WHERE email=$1", &customer, email)
 
 	if err != nil {
 		return nil, err
