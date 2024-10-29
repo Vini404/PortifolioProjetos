@@ -96,6 +96,25 @@ func (controller *AccountController) Get(res http.ResponseWriter, req *http.Requ
 	SetResponseSuccessWithPayload(res, account)
 }
 
+func (controller *AccountController) InformationAccount(res http.ResponseWriter, req *http.Request) {
+	id := chi.URLParam(req, "id")
+
+	idParsed, err := strconv.Atoi(id)
+
+	if err != nil {
+		SetResponseError(res, err)
+		return
+	}
+	account, errGet := controller.S_GetInformationAccount(idParsed)
+
+	if errGet != nil {
+		SetResponseError(res, errGet)
+		return
+	}
+
+	SetResponseSuccessWithPayload(res, account)
+}
+
 func (controller *AccountController) Delete(res http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
 

@@ -18,6 +18,7 @@ func (c BalanceRoutes) AddToRouter(r *chi.Mux) {
 	var balanceController = GetBalanceController()
 
 	r.With(auth.AuthMiddleware).Get("/balance/{accountID}", balanceController.Get)
+	r.With(auth.AuthMiddleware).Get("/balance/extract/{accountID}", balanceController.Extract)
 }
 
 func GetBalanceController() controllers.BalanceController {

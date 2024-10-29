@@ -18,6 +18,7 @@ func (c AccountRoutes) AddToRouter(r *chi.Mux) {
 	var accountController = GetAccountController()
 
 	r.With(auth.AuthMiddleware).Get("/account", accountController.List)
+	r.With(auth.AuthMiddleware).Get("/account/{id}/information", accountController.InformationAccount)
 	r.With(auth.AuthMiddleware).Get("/account/{id}", accountController.Get)
 	r.With(auth.AuthMiddleware).Post("/account", accountController.Create)
 	r.With(auth.AuthMiddleware).Put("/account", accountController.Update)

@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	dto "secbank.api/dto/account"
 	"secbank.api/interfaces"
 	"secbank.api/models"
 	"secbank.api/utils"
@@ -63,4 +64,22 @@ func (repository *AccountRepository) R_Get(id int) (*models.Account, error) {
 		return nil, err
 	}
 	return &account, nil
+}
+
+func (repository *AccountRepository) R_GetInformationAccount(id int) (*dto.InformationAccountResponse, error) {
+	informationAccount := dto.InformationAccountResponse{}
+	sql := `
+		SELECT 
+		    concat(a.Number,'-',a.Digit) as AccountNumber, 
+		    c.FullName as CustomerName 
+			from Account a
+			inner join AccountHolder ah on ah.ID = a.IDAccountHolder
+			inner join customer c on c.ID = ah.IdCustomer
+			where a.ID = $1`
+	err := repository.QueryWithParamSingleRow(sql, &informationAccount, id)
+
+	if err != nil {
+		return nil, err
+	}
+	return &informationAccount, nil
 }

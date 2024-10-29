@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	dto "secbank.api/dto/account"
 	"secbank.api/interfaces/repository"
 	"secbank.api/models"
 )
@@ -50,4 +51,13 @@ func (service *AccountService) S_Get(id int) (*models.Account, error) {
 		return nil, err
 	}
 	return account, nil
+}
+
+func (service *AccountService) S_GetInformationAccount(id int) (*dto.InformationAccountResponse, error) {
+	informationAccount, err := service.IAccountRepository.R_GetInformationAccount(id)
+
+	if err != nil {
+		return nil, err
+	}
+	return informationAccount, nil
 }

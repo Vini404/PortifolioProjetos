@@ -20,12 +20,31 @@ func (controller *BalanceController) Get(res http.ResponseWriter, req *http.Requ
 		SetResponseError(res, err)
 		return
 	}
-	account, errGet := controller.S_GetByAccountID(accountIDParsed)
+	currentBalance, errGet := controller.S_GetByAccountID(accountIDParsed)
 
 	if errGet != nil {
 		SetResponseError(res, errGet)
 		return
 	}
 
-	SetResponseSuccessWithPayload(res, account)
+	SetResponseSuccessWithPayload(res, currentBalance)
+}
+
+func (controller *BalanceController) Extract(res http.ResponseWriter, req *http.Request) {
+	id := chi.URLParam(req, "accountID")
+
+	accountIDParsed, err := strconv.Atoi(id)
+
+	if err != nil {
+		SetResponseError(res, err)
+		return
+	}
+	extractResponse, errGet := controller.S_Extract(accountIDParsed)
+
+	if errGet != nil {
+		SetResponseError(res, errGet)
+		return
+	}
+
+	SetResponseSuccessWithPayload(res, extractResponse)
 }
