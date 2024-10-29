@@ -1,8 +1,10 @@
 package auth
 
 import (
+	"encoding/json"
 	"github.com/golang-jwt/jwt/v4"
 	"net/http"
+	"secbank.api/dto"
 	"strings"
 	"time"
 )
@@ -41,7 +43,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			http.Error(w, "Authorization header missing", http.StatusUnauthorized)
+			SetForbidden(w)
 			return
 		}
 
@@ -56,11 +58,29 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		// Check for errors and token validity
 		if err != nil || !token.Valid {
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			SetForbidden(w)
 			return
 		}
 
 		// Set the claims as context or session variables if needed
 		next.ServeHTTP(w, r)
 	})
+}
+
+func SetForbidden(res http.ResponseWriter) {
+	response := dto.Response{
+		Success:    false,
+		Timestamp:  time.Now(),
+		StatusCode: 403,
+	}
+
+	SetResponse(res, response)
+}
+
+func SetResponse(res http.ResponseWriter, response dto.Response) {
+	res.Header().Set("Content-Type", "application/json")
+
+	res.WriteHeader(response.StatusCode)
+
+	json.NewEncoder(res).Encode(response)
 }

@@ -16,7 +16,7 @@ func (service *AccountService) S_List() (*[]models.Account, error) {
 }
 
 func (service *AccountService) S_Create(account models.Account) error {
-	err := service.IAccountRepository.R_Create(account)
+	_, err := service.IAccountRepository.R_Create(account)
 
 	if err != nil {
 		return err

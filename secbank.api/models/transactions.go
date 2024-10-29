@@ -4,9 +4,9 @@ import "time"
 
 type Transaction struct {
 	ID               int       `db:"id"`
-	IDDebitAccount   int       `db:"id_debit_account"`
-	IDCreditAccount  int       `db:"id_credit_account"`
+	IDDebitAccount   int       `db:"iddebitaccount"`
+	IDCreditAccount  int       `db:"idcreditaccount"`
 	Amount           float64   `db:"amount"`
-	CreatedTimeStamp time.Time `db:"created_time_stamp"`
-	TransactionType  int       `db:"transaction_type"`
+	CreatedTimeStamp time.Time `db:"createdtimestamp"`
+	TransactionType  int       `db:"transactiontype"`
 }

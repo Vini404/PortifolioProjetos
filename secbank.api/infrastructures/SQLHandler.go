@@ -30,29 +30,31 @@ func (handler *SQLHandler) QueryWithParamSingleRow(statement string, dest interf
 	return err
 }
 
-func (handler *SQLHandler) Insert(entity interface{}, tableName string) error {
+func (handler *SQLHandler) Insert(entity interface{}, tableName string) (int, error) {
 	dialect := goqu.Dialect("postgres")
 
+	// Converte a entidade para um mapa, excluindo o campo "id"
 	entityWithoutID, err := utils.StructToMapWithoutID(entity, "id")
-
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	insert := dialect.Insert(tableName).Rows(entityWithoutID)
+	// Configura a query de inserção com retorno do ID
+	insert := dialect.Insert(tableName).Rows(entityWithoutID).Returning("id")
 
 	sql, args, err := insert.ToSQL()
-
 	if err != nil {
-		return err
+		return 0, err
 	}
 
+	// Executa a query e captura o ID retornado
+	var id int
 	row := handler.Conn.QueryRow(sql, args...)
-
-	if row.Err() != nil {
-		return row.Err()
+	if err := row.Scan(&id); err != nil {
+		return 0, err
 	}
-	return nil
+
+	return id, nil
 }
 
 func (handler *SQLHandler) Delete(id int, tableName string) error {

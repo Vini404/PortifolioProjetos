@@ -31,8 +31,12 @@ func GetCustomerController() controllers.CustomerController {
 	sqliteHandler.Conn = database.NewConnection()
 
 	customerRepository := &repositories.CustomerRepository{sqliteHandler}
+	accountRepository := &repositories.AccountRepository{sqliteHandler}
+	accountHolderRepository := &repositories.AccountHolderRepository{sqliteHandler}
+	balanceRepository := &repositories.BalanceRepository{sqliteHandler}
 
-	customerService := &services.CustomerService{customerRepository}
+	customerService := &services.CustomerService{ICustomerRepository: customerRepository, IAccountRepository: accountRepository, IAccountHolderRepository: accountHolderRepository, IBalanceRepository: balanceRepository}
+
 	customerController := controllers.CustomerController{ICustomerService: customerService}
 
 	return customerController

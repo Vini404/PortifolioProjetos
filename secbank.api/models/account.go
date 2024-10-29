@@ -4,10 +4,10 @@ import "time"
 
 type Account struct {
 	ID               int       `db:"id"`
-	IDAccountHolder  int       `db:"id_account_holder"`
-	IsActive         bool      `db:"is_active"`
+	IDAccountHolder  int       `db:"idaccountholder"`
+	IsActive         bool      `db:"isactive"`
 	Number           string    `db:"number"`
 	Digit            string    `db:"digit"`
-	CreatedTimeStamp time.Time `db:"created_time_stamp"`
-	UpdatedTimeStamp time.Time `db:"updated_time_stamp,omitempty"`
+	CreatedTimeStamp time.Time `db:"createdtimestamp"`
+	UpdatedTimeStamp time.Time `db:"updatedtimestamp"`
 }

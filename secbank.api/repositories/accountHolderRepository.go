@@ -13,7 +13,7 @@ type AccountHolderRepository struct {
 
 func (repository *AccountHolderRepository) R_List() (*[]models.AccountHolder, error) {
 	var accountHolder []models.AccountHolder
-	err := repository.Query("SELECT * FROM AccountHolder", &accountHolder)
+	err := repository.Query("SELECT * FROM accountholder", &accountHolder)
 
 	if err != nil {
 		return nil, err
@@ -24,20 +24,20 @@ func (repository *AccountHolderRepository) R_List() (*[]models.AccountHolder, er
 	return &accountHolder, nil
 }
 
-func (repository *AccountHolderRepository) R_Create(accountHolder models.AccountHolder) error {
+func (repository *AccountHolderRepository) R_Create(accountHolder models.AccountHolder) (int, error) {
 	accountHolder.CreatedTimeStamp = time.Now()
-	err := repository.Insert(accountHolder, "accountHolder")
+	id, err := repository.Insert(accountHolder, "accountholder")
 
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return id, err
 }
 
 func (repository *AccountHolderRepository) R_Update(accountHolder models.AccountHolder) error {
 	accountHolder.UpdatedTimeStamp = time.Now()
 	accountHolderToUpdate := utils.StructToMap(accountHolder)
-	err := repository.Update(accountHolder.ID, "accountHolder", accountHolderToUpdate)
+	err := repository.Update(accountHolder.ID, "accountholder", accountHolderToUpdate)
 
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func (repository *AccountHolderRepository) R_Update(accountHolder models.Account
 
 func (repository *AccountHolderRepository) R_Delete(id int) error {
 
-	err := repository.Delete(id, "accountHolder")
+	err := repository.Delete(id, "accountholder")
 
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func (repository *AccountHolderRepository) R_Delete(id int) error {
 
 func (repository *AccountHolderRepository) R_Get(id int) (*models.AccountHolder, error) {
 	account := models.AccountHolder{}
-	err := repository.Get(id, "accountHolder", &account)
+	err := repository.Get(id, "accountholder", &account)
 
 	if err != nil {
 		return nil, err

@@ -24,14 +24,14 @@ func (repository *AccountRepository) R_List() (*[]models.Account, error) {
 	return &account, nil
 }
 
-func (repository *AccountRepository) R_Create(account models.Account) error {
+func (repository *AccountRepository) R_Create(account models.Account) (int, error) {
 	account.CreatedTimeStamp = time.Now()
-	err := repository.Insert(account, "account")
+	id, err := repository.Insert(account, "account")
 
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return id, nil
 }
 
 func (repository *AccountRepository) R_Update(account models.Account) error {

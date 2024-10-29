@@ -15,14 +15,14 @@ func (service *AccountHolderService) S_List() (*[]models.AccountHolder, error) {
 	return allAccountHolders, err
 }
 
-func (service *AccountHolderService) S_Create(accountHolder models.AccountHolder) error {
-	err := service.IAccountHolderRepository.R_Create(accountHolder)
+func (service *AccountHolderService) S_Create(accountHolder models.AccountHolder) (int, error) {
+	id, err := service.IAccountHolderRepository.R_Create(accountHolder)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (service *AccountHolderService) S_Update(accountHolder models.AccountHolder) error {

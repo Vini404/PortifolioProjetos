@@ -3,25 +3,71 @@ package services
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"secbank.api/auth"
 	dto "secbank.api/dto/customer"
 	"secbank.api/interfaces/repository"
 	"secbank.api/models"
+	"strconv"
+	"time"
 )
 
 type CustomerService struct {
 	interfaces.ICustomerRepository
+	interfaces.IAccountHolderRepository
+	interfaces.IAccountRepository
+	interfaces.IBalanceRepository
 }
 
 func (service *CustomerService) S_List() (*[]models.Customer, error) {
-	allCustomers, err := service.R_List()
+	allCustomers, err := service.ICustomerRepository.R_List()
 	return allCustomers, err
 }
 
 func (service *CustomerService) S_Create(customer models.Customer) error {
-	err := service.ICustomerRepository.R_Create(customer)
+	id, err := service.ICustomerRepository.R_Create(customer)
 
 	if err != nil {
+		return err
+	}
+
+	accountHolder := models.AccountHolder{
+		IsActive:         true,
+		CreatedTimeStamp: time.Now(),
+		IDCustomer:       id,
+	}
+
+	idAccountHolder, errAccountHolder := service.IAccountHolderRepository.R_Create(accountHolder)
+
+	if errAccountHolder != nil {
+		return errAccountHolder
+	}
+
+	account := models.Account{
+
+		CreatedTimeStamp: time.Now(),
+		IsActive:         true,
+		IDAccountHolder:  idAccountHolder,
+		Number:           strconv.Itoa(generate7DigitNumber()),
+		Digit:            strconv.Itoa(idAccountHolder),
+	}
+
+	accountID, errAccount := service.IAccountRepository.R_Create(account)
+
+	if errAccount != nil {
+		return errAccount
+	}
+
+	balance := models.Balance{
+		IDAccount:        accountID,
+		Amount:           0,
+		AmountBlocked:    0,
+		UpdatedTimeStamp: time.Now(),
+	}
+
+	_, errBalance := service.IBalanceRepository.R_Create(balance)
+
+	if errBalance != nil {
 		return err
 	}
 
@@ -77,4 +123,9 @@ func (service *CustomerService) S_Auth(request dto.AuthRequest) (*dto.AuthRespon
 	}
 
 	return &dto.AuthResponse{Token: token}, nil
+}
+
+func generate7DigitNumber() int {
+	rand.Seed(time.Now().UnixNano())    // Seed the random number generator
+	return rand.Intn(9000000) + 1000000 // Generates a number between 1,000,000 and 9,999,999
 }
