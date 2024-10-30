@@ -116,7 +116,7 @@ func (service *CustomerService) S_Auth(request dto.AuthRequest) (*dto.AuthRespon
 		return nil, errors.New("Usuario ou senha incorreta.")
 	}
 
-	token, err := auth.GenerateJWT(customer.Email)
+	token, err := auth.GenerateJWT(customer.ID)
 
 	if err != nil {
 		return nil, err

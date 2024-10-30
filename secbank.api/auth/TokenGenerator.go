@@ -13,15 +13,15 @@ var jwtSecret = []byte("c6fa045f97ba66935841bf6bfcc5bf4620cd059348ffe1d2ab39991f
 
 // Claims struct
 type Claims struct {
-	Username string `json:"username"`
+	CustomerID int `json:"customer_id"`
 	jwt.StandardClaims
 }
 
 // Function to generate JWT token
-func GenerateJWT(username string) (string, error) {
+func GenerateJWT(customer_id int) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour) // Set expiration time
 	claims := &Claims{
-		Username: username,
+		CustomerID: customer_id,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -65,6 +65,18 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		// Set the claims as context or session variables if needed
 		next.ServeHTTP(w, r)
 	})
+}
+
+func GetCustomerIDByJwtToken(token string) int {
+	tokenJWT, _ := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+
+		return jwtSecret, nil
+	})
+
+	claims := tokenJWT.Claims.(*Claims)
+
+	return claims.CustomerID
+
 }
 
 func SetForbidden(res http.ResponseWriter) {

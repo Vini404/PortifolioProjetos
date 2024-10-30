@@ -12,4 +12,5 @@ type IAccountRepository interface {
 	R_Delete(id int) error
 	R_Get(id int) (*models.Account, error)
 	R_GetInformationAccount(id int) (*dto.InformationAccountResponse, error)
+	R_GetAccountByCustomer(customerID int) (*models.Account, error)
 }

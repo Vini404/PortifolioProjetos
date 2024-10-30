@@ -71,7 +71,8 @@ func (repository *AccountRepository) R_GetInformationAccount(id int) (*dto.Infor
 	sql := `
 		SELECT 
 		    concat(a.Number,'-',a.Digit) as AccountNumber, 
-		    c.FullName as CustomerName 
+		    c.FullName as CustomerName,
+		    c.ID as CustomerID
 			from Account a
 			inner join AccountHolder ah on ah.ID = a.IDAccountHolder
 			inner join customer c on c.ID = ah.IdCustomer
@@ -82,4 +83,21 @@ func (repository *AccountRepository) R_GetInformationAccount(id int) (*dto.Infor
 		return nil, err
 	}
 	return &informationAccount, nil
+}
+
+func (repository *AccountRepository) R_GetAccountByCustomer(customerID int) (*models.Account, error) {
+	account := models.Account{}
+	sql := `
+		SELECT 
+		   	a.*
+			from Account a
+			inner join AccountHolder ah on ah.ID = a.IDAccountHolder
+			inner join customer c on c.ID = ah.IdCustomer
+			where c.ID = $1`
+	err := repository.QueryWithParamSingleRow(sql, &account, customerID)
+
+	if err != nil {
+		return nil, err
+	}
+	return &account, nil
 }

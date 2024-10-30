@@ -9,4 +9,5 @@ type Transaction struct {
 	Amount           float64   `db:"amount"`
 	CreatedTimeStamp time.Time `db:"createdtimestamp"`
 	TransactionType  int       `db:"transactiontype"`
+	Description      string    `db:"description"`
 }

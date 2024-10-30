@@ -4,6 +4,8 @@ import (
 	dto "secbank.api/dto/balance"
 	"secbank.api/interfaces"
 	"secbank.api/models"
+	"secbank.api/utils"
+	"time"
 )
 
 type BalanceRepository struct {
@@ -51,4 +53,16 @@ func (repository *BalanceRepository) R_Create(balance models.Balance) (int, erro
 	}
 
 	return id, nil
+}
+
+func (repository *BalanceRepository) R_Update(balance *models.Balance) error {
+	balance.UpdatedTimeStamp = time.Now()
+	balanceToUpdate := utils.StructToMap(balance)
+	err := repository.Update(balance.ID, "customer", balanceToUpdate)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

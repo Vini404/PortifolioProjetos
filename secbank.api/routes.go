@@ -17,6 +17,7 @@ func (router *router) InitRouter() *chi.Mux {
 	routes.CustomerRoutes{}.AddToRouter(r)
 	routes.AccountRoutes{}.AddToRouter(r)
 	routes.BalanceRoutes{}.AddToRouter(r)
+	routes.TransactionRoutes{}.AddToRouter(r)
 
 	return r
 }
