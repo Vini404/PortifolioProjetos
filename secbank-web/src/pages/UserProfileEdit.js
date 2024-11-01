@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Button, TextField, Typography, Paper, Box, InputAdornment
 } from '@mui/material';
 import { styled } from '@mui/system';
-import { isValidPhoneNumber } from 'libphonenumber-js'; // Biblioteca para validar telefone (instalar via npm)
+import { isValidPhoneNumber } from 'libphonenumber-js';
 import dayjs from 'dayjs';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
@@ -19,23 +19,64 @@ const FormContainer = styled(Paper)(({ theme }) => ({
 }));
 
 const ReadOnlyTextField = styled(TextField)({
-  backgroundColor: '#e0e0e0', // Fundo cinza claro
-  color: '#757575', // Texto com tom mais claro
+  backgroundColor: '#e0e0e0',
+  color: '#757575',
   '& .MuiInputBase-input': {
-    color: '#757575', // Cor do texto dentro do campo
+    color: '#757575',
   },
 });
 
 const UserProfileEdit = () => {
   const [userData, setUserData] = useState({
-    name: 'João da Silva',
-    cpf: '123.456.789-10',
+    id: '',
+    name: '',
+    cpf: '',
     phone: '',
     birthDate: '',
     email: '',
+    createdTimeStamp: '',
+    updatedTimeStamp: '',
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  const fetchUserData = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return alert("Token não encontrado");
+
+    try {
+      const response = await fetch('http://secbank-lb-1340144523.us-east-1.elb.amazonaws.com/customer/info', {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        const data = result.data;
+        setUserData({
+          id: data.ID || '',
+          name: data.FullName || '',
+          cpf: data.CPF || '',
+          phone: data.Phone || '',
+          birthDate: data.Birthday || '',
+          email: data.Email || '',
+          createdTimeStamp: data.CreatedTimeStamp || '',
+          updatedTimeStamp: data.UpdatedTimeStamp || '',
+        });
+      } else {
+        alert(result.messageError || 'Erro ao carregar dados do usuário');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   const handleChange = (e) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
@@ -51,7 +92,7 @@ const UserProfileEdit = () => {
     return today.diff(birthDate, 'year') < 18;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -66,10 +107,41 @@ const UserProfileEdit = () => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      alert('Dados atualizados com sucesso!');
-      console.log(userData);
+      const token = localStorage.getItem('token');
+      if (!token) return alert("Token não encontrado");
+
+      const requestData = {
+        ID: userData.id,
+        FullName: userData.name,
+        Phone: userData.phone,
+        Email: userData.email,
+        Birthday: new Date(userData.birthDate).toISOString(),
+        CreatedTimeStamp: userData.createdTimeStamp,
+        UpdatedTimeStamp: new Date().toISOString(),
+      };
+
+      try {
+        const response = await fetch('http://secbank-lb-1340144523.us-east-1.elb.amazonaws.com/customer', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(requestData),
+        });
+
+        if (response.ok) {
+          alert('Dados atualizados com sucesso!');
+        } else {
+          alert('Erro ao atualizar dados');
+        }
+      } catch (error) {
+        console.error('Erro ao atualizar dados:', error);
+      }
     }
   };
+
+  if (loading) return <Typography>Carregando...</Typography>;
 
   return (
     <Box
@@ -81,8 +153,8 @@ const UserProfileEdit = () => {
         backgroundColor: '#f5f5f5',
       }}
     >
-    <Navbar />
-    <Sidebar />
+      <Navbar />
+      <Sidebar />
       <FormContainer elevation={3}>
         <Typography variant="h4" gutterBottom color="primary" fontWeight="bold">
           Editar Registro

@@ -22,6 +22,7 @@ func (c CustomerRoutes) AddToRouter(r *chi.Mux) {
 
 	r.With(auth.AuthMiddleware).Get("/customer", customerController.List)
 	r.With(auth.AuthMiddleware).Get("/customer/{id}", customerController.Get)
+	r.With(auth.AuthMiddleware).Get("/customer/info", customerController.GetCustomerByToken)
 	r.With(auth.AuthMiddleware).Put("/customer", customerController.Update)
 	r.With(auth.AuthMiddleware).Delete("/customer/{id}", customerController.Delete)
 }

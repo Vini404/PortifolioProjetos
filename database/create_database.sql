@@ -9,6 +9,7 @@ create table Customer(
 	FullName varchar(100) not null,
 	Phone varchar(50) not null,
 	Email varchar(255) not null,
+	Password varchar not null,
 	Birthday timestamp not null,
 	CreatedTimeStamp timestamp not null,
 	UpdatedTimeStamp timestamp,
@@ -31,6 +32,9 @@ create table Account (
 	ID SERIAL,
 	IDAccountHolder int not null,
 	IsActive bool not null,
+	Number varchar(255),
+	Digit varchar(255),
+	Description varchar(255),
 	CreatedTimeStamp timestamp not null,
 	UpdatedTimeStamp timestamp,
 	
@@ -42,8 +46,8 @@ create table Account (
 create table Balance (
 	ID SERIAL,
 	IDAccount int not null,
-	Ammount decimal not null,
-	AmmountBlocked decimal not null,
+	Amount decimal not null,
+	AmountBlocked decimal not null,
 	UpdatedTimeStamp timestamp,
 	
 	primary KEY(ID),
@@ -54,9 +58,10 @@ create table Transactions (
 	ID SERIAL,
 	IDDebitAccount int not null,
 	IDCreditAccount int not null,
-	Ammount decimal not null,
+	Amount decimal not null,
 	CreatedTimeStamp timestamp not null,
-	TransactionType integer not null,
+	Description varchar(255),
+	
 	primary KEY(ID),
 	constraint fk_account_debit foreign KEY(IDDebitAccount) references Account(ID),
 	constraint fk_account_credit foreign KEY(IDCreditAccount) references Account(ID)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/go-chi/chi"
+	"net/http"
 	"secbank.api/routes"
 	"sync"
 )
@@ -14,6 +15,9 @@ type router struct{}
 
 func (router *router) InitRouter() *chi.Mux {
 	r := chi.NewRouter()
+	r.Use(corsMiddleware)
+	r.Get("/healthcheck", HealthCheckHandler)
+
 	routes.CustomerRoutes{}.AddToRouter(r)
 	routes.AccountRoutes{}.AddToRouter(r)
 	routes.BalanceRoutes{}.AddToRouter(r)
@@ -34,4 +38,22 @@ func ChiRouter() IChiRouter {
 		})
 	}
 	return m
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }

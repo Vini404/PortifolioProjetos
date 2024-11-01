@@ -3,7 +3,7 @@ import { Button, TextField, Box, Typography, Paper } from '@mui/material';
 import { styled } from '@mui/system';
 
 const Background = styled(Box)({
-  background: '#f5f5f5', // Cor de fundo neutra e básica
+  background: '#f5f5f5',
   minHeight: '100vh',
   display: 'flex',
   justifyContent: 'center',
@@ -16,21 +16,21 @@ const RegisterPaper = styled(Paper)({
   textAlign: 'center',
   borderRadius: '12px',
   boxShadow: '0px 10px 30px rgba(0,0,0,0.1)',
-  backgroundColor: '#ffffff', // Mantém o fundo branco limpo
+  backgroundColor: '#ffffff',
 });
 
 const StyledButton = styled(Button)(({ error }) => ({
   marginTop: '20px',
-  background: '#3f51b5', // Cor sólida e básica
+  background: '#3f51b5',
   padding: '10px 20px',
   borderRadius: '25px',
   color: '#fff',
   fontWeight: 'bold',
   textTransform: 'none',
   transition: '0.3s',
-  border: error ? '2px solid red' : 'none', // Contorno vermelho em caso de erro
+  border: error ? '2px solid red' : 'none',
   '&:hover': {
-    background: '#303f9f', // Cor mais escura ao passar o mouse
+    background: '#303f9f',
   },
 }));
 
@@ -42,23 +42,44 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [birthday, setBirthday] = useState('');
   const [passwordError, setPasswordError] = useState(false);
+  const [registrationError, setRegistrationError] = useState('');
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (password !== confirmPassword) {
       setPasswordError(true);
       return;
     }
 
-    // Lógica para registrar o usuário
-    console.log({
-      fullName,
-      phone,
-      email,
-      password,
-      birthday,
-    });
+    // Formatação dos dados para o contrato
+    const requestData = {
+      FullName: fullName,
+      Phone: phone,
+      Email: email,
+      Birthday: new Date(birthday).toISOString(),
+      Password: password,
+    };
 
-    alert('Usuário registrado com sucesso!');
+    try {
+      const response = await fetch('http://secbank-lb-1340144523.us-east-1.elb.amazonaws.com/customer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setRegistrationSuccess(true);
+        setRegistrationError('');
+        alert('Usuário registrado com sucesso!');
+      } else {
+        setRegistrationSuccess(false);
+        setRegistrationError(result.messageError || 'Erro ao registrar o usuário');
+      }
+    } catch (err) {
+      setRegistrationError('Erro de conexão com o servidor');
+    }
   };
 
   return (
@@ -121,12 +142,12 @@ const RegisterPage = () => {
           value={confirmPassword}
           onChange={(e) => {
             setConfirmPassword(e.target.value);
-            setPasswordError(false); // Remove o erro ao alterar o campo
+            setPasswordError(false);
           }}
           InputProps={{
             style: { borderRadius: '10px' },
           }}
-          error={passwordError} // Mostra erro no campo se as senhas não coincidem
+          error={passwordError}
           helperText={passwordError && "As senhas não coincidem"}
         />
         <TextField
@@ -148,10 +169,20 @@ const RegisterPage = () => {
           variant="contained"
           onClick={handleRegister}
           fullWidth
-          error={passwordError} // Aplica o estilo de erro ao botão
+          error={passwordError}
         >
           Registrar
         </StyledButton>
+        {registrationError && (
+          <Typography color="error" sx={{ mt: 2 }}>
+            {registrationError}
+          </Typography>
+        )}
+        {registrationSuccess && (
+          <Typography color="primary" sx={{ mt: 2 }}>
+            Registro bem-sucedido!
+          </Typography>
+        )}
       </RegisterPaper>
     </Background>
   );

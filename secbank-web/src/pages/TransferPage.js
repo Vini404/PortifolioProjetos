@@ -60,46 +60,18 @@ const TransferPage = () => {
               type="number"
               required
             />
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Conta de Origem</InputLabel>
-              <Select
-                name="fromAccount"
-                value={transferData.fromAccount}
-                onChange={handleChange}
-                required
-              >
-                {userAccounts.map((account, index) => (
-                  <MenuItem
-                    key={index}
-                    value={`${account.number}-${account.digit}`}
-                  >
-                    {`${account.number}-${account.digit}`}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
           </>
         );
       case 1:
         return (
           <>
             <TextField
-              label="Número da Conta de Destino"
+              label="Número e digito da Conta de Destino"
               variant="outlined"
               fullWidth
               margin="normal"
               name="toAccount"
               value={transferData.toAccount}
-              onChange={handleChange}
-              required
-            />
-            <TextField
-              label="Nome do Destinatário"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              name="toAccountName"
-              value={transferData.toAccountName}
               onChange={handleChange}
               required
             />

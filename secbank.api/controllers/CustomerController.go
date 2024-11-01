@@ -5,10 +5,12 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/jinzhu/copier"
 	"net/http"
+	"secbank.api/auth"
 	"secbank.api/dto/customer"
 	"secbank.api/interfaces/service"
 	"secbank.api/models"
 	"strconv"
+	"strings"
 )
 
 type CustomerController struct {
@@ -112,6 +114,22 @@ func (controller *CustomerController) Get(res http.ResponseWriter, req *http.Req
 		return
 	}
 	customer, errGet := controller.S_Get(idParsed)
+
+	if errGet != nil {
+		SetResponseError(res, errGet)
+		return
+	}
+
+	SetResponseSuccessWithPayload(res, customer)
+}
+
+func (controller *CustomerController) GetCustomerByToken(res http.ResponseWriter, req *http.Request) {
+
+	authHeader := req.Header.Get("Authorization")
+
+	tokenString := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer"))
+
+	customer, errGet := controller.S_Get(auth.GetCustomerIDByJwtToken(tokenString))
 
 	if errGet != nil {
 		SetResponseError(res, errGet)

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, TextField, Box, Typography, Paper, CircularProgress } from '@mui/material';
 import { styled } from '@mui/system';
-import { useNavigate } from 'react-router-dom'; // Importação do hook para navegação
+import { useNavigate } from 'react-router-dom';
 
 const Background = styled(Box)({
   background: '#f5f5f5',
@@ -38,22 +38,42 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Hook de navegação
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setLoading(true);
-    setTimeout(() => {
+    setError('');
+
+    try {
+      const response = await fetch('http://secbank-lb-1340144523.us-east-1.elb.amazonaws.com/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Salva o token no localStorage
+        localStorage.setItem('token', result.data.token);
+        navigate('/home');
+      } else {
+        setError(result.messageError || 'Erro ao autenticar');
+      }
+    } catch (err) {
+      setError('Erro de conexão com o servidor');
+    } finally {
       setLoading(false);
-      navigate('/home');
-    }, 2000);
+    }
   };
 
   const handleForgotPassword = () => {
-    navigate('/passwordRecovery'); // Redireciona para a página de recuperação de senha
+    navigate('/passwordRecovery');
   };
 
   const handleRegister = () => {
-    navigate('/register'); // Redireciona para a página de registro
+    navigate('/register');
   };
 
   return (
@@ -91,6 +111,11 @@ const LoginPage = () => {
           <StyledButton variant="contained" onClick={handleLogin} fullWidth>
             Entrar
           </StyledButton>
+        )}
+        {error && (
+          <Typography color="error" sx={{ mt: 2 }}>
+            {error}
+          </Typography>
         )}
         <Typography
           variant="body2"
