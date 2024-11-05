@@ -15,7 +15,7 @@ type TransactionService struct {
 }
 
 func (service *TransactionService) Transfer(transferRequest dto.TransferRequest) error {
-	creditAccount, errCreditAccountInformation := service.IAccountRepository.R_Get(transferRequest.IDCreditAccount)
+	creditAccount, errCreditAccountInformation := service.IAccountRepository.R_Get_By_Number_And_Digit(transferRequest.NumberCreditAccount, transferRequest.DigitCreditAccount)
 
 	if errCreditAccountInformation != nil {
 		return errCreditAccountInformation
@@ -65,6 +65,7 @@ func (service *TransactionService) Transfer(transferRequest dto.TransferRequest)
 		IDDebitAccount:   debitAccount.ID,
 		Amount:           transferRequest.Amount,
 		Description:      "Transferencia entre contas",
+		TransactionType:  1,
 	}
 
 	_, errInsertBalance := service.ITransactionRepository.R_Create(transaction)

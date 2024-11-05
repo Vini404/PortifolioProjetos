@@ -33,7 +33,8 @@ func (controller *TransactionController) Transfer(res http.ResponseWriter, req *
 
 	transferRequest := dto.TransferRequest{
 		Amount:                  transferUserRequest.Amount,
-		IDCreditAccount:         transferUserRequest.IDCreditAccount,
+		DigitCreditAccount:      transferUserRequest.DigitCreditAccount,
+		NumberCreditAccount:     transferUserRequest.NumberCreditAccount,
 		IDCustomerOriginAccount: auth.GetCustomerIDByJwtToken(tokenString),
 	}
 

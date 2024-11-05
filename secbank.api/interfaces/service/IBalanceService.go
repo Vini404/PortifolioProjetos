@@ -7,5 +7,5 @@ import (
 
 type IBalanceService interface {
 	S_GetByAccountID(accountID int) (*models.Balance, error)
-	S_Extract(accountID int) (*dto.ExtractResponse, error)
+	S_Extract(accountID int) ([]*dto.ExtractResponse, error)
 }

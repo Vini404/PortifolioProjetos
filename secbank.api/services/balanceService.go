@@ -20,7 +20,7 @@ func (service *BalanceService) S_GetByAccountID(accountID int) (*models.Balance,
 	return balance, nil
 }
 
-func (service *BalanceService) S_Extract(accountID int) (*dto.ExtractResponse, error) {
+func (service *BalanceService) S_Extract(accountID int) ([]*dto.ExtractResponse, error) {
 	extract, err := service.IBalanceRepository.R_Extract(accountID)
 
 	if err != nil {

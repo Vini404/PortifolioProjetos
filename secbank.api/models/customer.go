@@ -8,6 +8,7 @@ type Customer struct {
 	Phone            string    `db:"phone"`
 	Email            string    `db:"email"`
 	Password         string    `db:"password"`
+	Document         string    `db:"document"`
 	Birthday         time.Time `db:"birthday"`
 	CreatedTimeStamp time.Time `db:"createdtimestamp"`
 	UpdatedTimeStamp time.Time `db:"updatedtimestamp"`

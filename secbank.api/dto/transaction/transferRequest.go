@@ -1,7 +1,8 @@
 package dto
 
 type TransferRequest struct {
-	IDCreditAccount         int     `json:"credit_account"`
+	DigitCreditAccount      string  `json:"digit_credit_account"`
+	NumberCreditAccount     string  `json:"number_credit_account"`
 	IDCustomerOriginAccount int     `json:"id_customer_origin_account"`
 	Amount                  float64 `json:"amount"`
 }

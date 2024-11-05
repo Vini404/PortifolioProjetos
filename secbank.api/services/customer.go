@@ -75,7 +75,13 @@ func (service *CustomerService) S_Create(customer models.Customer) error {
 }
 
 func (service *CustomerService) S_Update(customer models.Customer) error {
-	err := service.ICustomerRepository.R_Update(customer)
+	customerOriginal, _ := service.ICustomerRepository.R_Get(customer.ID)
+
+	customerOriginal.Phone = customer.Phone
+	customerOriginal.Birthday = customer.Birthday
+	customerOriginal.Email = customer.Email
+
+	err := service.ICustomerRepository.R_Update(*customerOriginal)
 
 	if err != nil {
 		fmt.Println(err.Error())

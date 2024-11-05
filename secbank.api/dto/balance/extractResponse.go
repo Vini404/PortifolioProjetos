@@ -1,7 +1,7 @@
 package dto
 
 type ExtractResponse struct {
-	OperationName string  `json:"operation_name"`
-	Amount        float64 `json:"amount"`
-	TransferType  string  `json:"transfer_type"`
+	OperationName string  `db:"operation_name"`
+	Amount        float64 `db:"amount"`
+	TransferType  string  `db:"transfer_type"`
 }

@@ -12,7 +12,7 @@ type TransactionRepository struct {
 
 func (repository *TransactionRepository) R_Create(transaction models.Transaction) (int, error) {
 	transaction.CreatedTimeStamp = time.Now()
-	id, err := repository.Insert(transaction, "transaction")
+	id, err := repository.Insert(transaction, "transactions")
 	if err != nil {
 		return 0, err
 	}

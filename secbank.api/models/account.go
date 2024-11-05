@@ -8,6 +8,7 @@ type Account struct {
 	IsActive         bool      `db:"isactive"`
 	Number           string    `db:"number"`
 	Digit            string    `db:"digit"`
+	Description      string    `db:"description"`
 	CreatedTimeStamp time.Time `db:"createdtimestamp"`
 	UpdatedTimeStamp time.Time `db:"updatedtimestamp"`
 }

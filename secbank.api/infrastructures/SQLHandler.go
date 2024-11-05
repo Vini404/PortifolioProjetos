@@ -30,6 +30,13 @@ func (handler *SQLHandler) QueryWithParamSingleRow(statement string, dest interf
 	return err
 }
 
+func (handler *SQLHandler) QueryWithParamMultiRow(statement string, dest interface{}, args ...interface{}) error {
+
+	err := handler.Conn.Select(dest, statement, args...)
+
+	return err
+}
+
 func (handler *SQLHandler) Insert(entity interface{}, tableName string) (int, error) {
 	dialect := goqu.Dialect("postgres")
 

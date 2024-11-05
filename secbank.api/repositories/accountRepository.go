@@ -85,6 +85,21 @@ func (repository *AccountRepository) R_GetInformationAccount(id int) (*dto.Infor
 	return &informationAccount, nil
 }
 
+func (repository *AccountRepository) R_Get_By_Number_And_Digit(number string, digit string) (*models.Account, error) {
+	account := models.Account{}
+	sql := `
+		SELECT 
+		    *
+			from Account a
+			where a.Number = $1 and a.Digit = $2`
+	err := repository.QueryWithParamSingleRow(sql, &account, number, digit)
+
+	if err != nil {
+		return nil, err
+	}
+	return &account, nil
+}
+
 func (repository *AccountRepository) R_GetAccountByCustomer(customerID int) (*models.Account, error) {
 	account := models.Account{}
 	sql := `

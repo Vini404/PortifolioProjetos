@@ -8,6 +8,7 @@ type IDbHandler interface {
 	Delete(id int, tableName string) error
 	Get(id int, tableName string, dest interface{}) error
 	QueryWithParamSingleRow(statement string, dest interface{}, args ...interface{}) error
+	QueryWithParamMultiRow(statement string, dest interface{}, args ...interface{}) error
 }
 
 type IRow interface {
