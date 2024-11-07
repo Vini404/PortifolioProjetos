@@ -11,6 +11,7 @@ create table Customer(
 	Email varchar(255) not null,
 	Password varchar not null,
 	Birthday timestamp not null,
+	Document varchar(14) not null,
 	CreatedTimeStamp timestamp not null,
 	UpdatedTimeStamp timestamp,
 	
@@ -59,8 +60,11 @@ create table Transactions (
 	IDDebitAccount int not null,
 	IDCreditAccount int not null,
 	Amount decimal not null,
-	CreatedTimeStamp timestamp not null,
+
+	TransactionType int not null,
 	Description varchar(255),
+	
+	CreatedTimeStamp timestamp not null,
 	
 	primary KEY(ID),
 	constraint fk_account_debit foreign KEY(IDDebitAccount) references Account(ID),

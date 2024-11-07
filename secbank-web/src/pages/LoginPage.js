@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, TextField, Box, Typography, Paper, CircularProgress } from '@mui/material';
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
+import api from '../api/axiosBase'
 
 const Background = styled(Box)({
   background: '#f5f5f5',
@@ -46,23 +47,22 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await fetch('http://secbank-lb-1340144523.us-east-1.elb.amazonaws.com/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await api.post('/login',
+        JSON.stringify({ email, password })
+      );
+      
+      var result = response.result
 
-      const result = await response.json();
-
-      if (result.success) {
-        // Salva o token no localStorage
+      if (response.ok) {
+        localStorage.clear();
+        console.log(result)
         localStorage.setItem('token', result.data.token);
         navigate('/home');
-      } else {
-        setError(result.messageError || 'Erro ao autenticar');
       }
-    } catch (err) {
-      setError('Erro de conexão com o servidor');
+
+    } catch (error) {
+      const errorMessage = JSON.parse(error.message).messageError
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

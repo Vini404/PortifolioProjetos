@@ -7,6 +7,8 @@ import { isValidPhoneNumber } from 'libphonenumber-js';
 import dayjs from 'dayjs';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
+import api from '../api/axiosBase'
+
 
 const FormContainer = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -46,30 +48,27 @@ const UserProfileEdit = () => {
     if (!token) return alert("Token não encontrado");
 
     try {
-      const response = await fetch('http://secbank-lb-1340144523.us-east-1.elb.amazonaws.com/customer/info', {
-        method: 'GET',
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        const data = result.data;
+      const response = (await api.get('/customer/info'));
+      
+      if (response.ok) {
+        const data = response.result.data;
         setUserData({
           id: data.ID || '',
           name: data.FullName || '',
-          cpf: data.CPF || '',
+          cpf: data.Document || '',
           phone: data.Phone || '',
-          birthDate: data.Birthday || '',
+          birthDate: dayjs(data.Birthday).format('YYYY-MM-DD') || '',
           email: data.Email || '',
           createdTimeStamp: data.CreatedTimeStamp || '',
           updatedTimeStamp: data.UpdatedTimeStamp || '',
         });
       } else {
-        alert(result.messageError || 'Erro ao carregar dados do usuário');
+        alert(response.messageError || 'Erro ao carregar dados do usuário');
       }
     } catch (error) {
-      console.error('Erro ao buscar dados:', error);
-    } finally {
+      const errorMessage = JSON.parse(error.message).messageError
+      alert(errorMessage);
+    }finally {
       setLoading(false);
     }
   };
@@ -121,14 +120,7 @@ const UserProfileEdit = () => {
       };
 
       try {
-        const response = await fetch('http://secbank-lb-1340144523.us-east-1.elb.amazonaws.com/customer', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify(requestData),
-        });
+        const response = await api.put('/customer', JSON.stringify(requestData));
 
         if (response.ok) {
           alert('Dados atualizados com sucesso!');

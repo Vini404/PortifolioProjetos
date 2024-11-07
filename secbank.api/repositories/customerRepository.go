@@ -19,8 +19,6 @@ func (repository *CustomerRepository) R_List() (*[]models.Customer, error) {
 		return nil, err
 	}
 
-	// Loop through rows, using Scan to assign column data to struct fields.
-
 	return &customers, nil
 }
 

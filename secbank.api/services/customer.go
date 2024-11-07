@@ -110,6 +110,10 @@ func (service *CustomerService) S_Get(id int) (*models.Customer, error) {
 func (service *CustomerService) S_Auth(request dto.AuthRequest) (*dto.AuthResponse, error) {
 	customer, err := service.ICustomerRepository.R_Get_By_Email(request.Email)
 
+	if err.Error() == "sql: no rows in result set" {
+		return nil, fmt.Errorf("O email ou senha informada estão incorretas")
+	}
+
 	if err != nil {
 		return nil, err
 	}

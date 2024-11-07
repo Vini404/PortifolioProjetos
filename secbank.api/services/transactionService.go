@@ -17,6 +17,10 @@ type TransactionService struct {
 func (service *TransactionService) Transfer(transferRequest dto.TransferRequest) error {
 	creditAccount, errCreditAccountInformation := service.IAccountRepository.R_Get_By_Number_And_Digit(transferRequest.NumberCreditAccount, transferRequest.DigitCreditAccount)
 
+	if errCreditAccountInformation.Error() == "sql: no rows in result set" {
+		return fmt.Errorf("A conta informada não existe.")
+	}
+
 	if errCreditAccountInformation != nil {
 		return errCreditAccountInformation
 	}

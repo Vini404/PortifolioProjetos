@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, TextField, Box, Typography, Paper } from '@mui/material';
 import { styled } from '@mui/system';
+import api from '../api/axiosBase'
 
 const Background = styled(Box)({
   background: '#f5f5f5',
@@ -41,6 +42,7 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [birthday, setBirthday] = useState('');
+  const [document, setDocument] = useState('');
   const [passwordError, setPasswordError] = useState(false);
   const [registrationError, setRegistrationError] = useState('');
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
@@ -58,27 +60,20 @@ const RegisterPage = () => {
       Email: email,
       Birthday: new Date(birthday).toISOString(),
       Password: password,
+      Document: document,
     };
 
     try {
-      const response = await fetch('http://secbank-lb-1340144523.us-east-1.elb.amazonaws.com/customer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestData),
-      });
-
-      const result = await response.json();
+      const response = await api.post('/customer', JSON.stringify(requestData));
 
       if (response.ok) {
         setRegistrationSuccess(true);
         setRegistrationError('');
         alert('Usuário registrado com sucesso!');
-      } else {
-        setRegistrationSuccess(false);
-        setRegistrationError(result.messageError || 'Erro ao registrar o usuário');
       }
-    } catch (err) {
-      setRegistrationError('Erro de conexão com o servidor');
+    } catch (error) {
+      const errorMessage = JSON.parse(error.message).messageError
+      alert(errorMessage);
     }
   };
 
@@ -122,6 +117,17 @@ const RegisterPage = () => {
           }}
         />
         <TextField
+          label="Documento"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={document}
+          onChange={(e) => setDocument(e.target.value)}
+          InputProps={{
+            style: { borderRadius: '10px' },
+          }}
+        />
+        <TextField
           label="Senha"
           variant="outlined"
           type="password"
@@ -148,7 +154,7 @@ const RegisterPage = () => {
             style: { borderRadius: '10px' },
           }}
           error={passwordError}
-          helperText={passwordError && "As senhas não coincidem"}
+          helperText={passwordError && 'As senhas não coincidem'}
         />
         <TextField
           label="Data de Nascimento"
