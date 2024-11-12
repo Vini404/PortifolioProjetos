@@ -11,6 +11,7 @@ import (
 	"secbank.api/models"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type CustomerController struct {
@@ -55,24 +56,48 @@ func (controller *CustomerController) List(res http.ResponseWriter, req *http.Re
 }
 
 func (controller *CustomerController) Create(res http.ResponseWriter, req *http.Request) {
-	var customerRequest dto.CreateCustomerRequest
-	var customer models.Customer
-
-	defer req.Body.Close()
-
-	decoder := json.NewDecoder(req.Body)
-
-	errDecode := decoder.Decode(&customerRequest)
-
-	if errDecode != nil {
-		SetResponseError(res, errDecode)
+	// Define um limite de memória para o arquivo de upload
+	err := req.ParseMultipartForm(10 << 20) // 10 MB
+	if err != nil {
+		SetResponseError(res, err)
 		return
 	}
 
-	copier.Copy(&customer, &customerRequest)
+	// Extrai o arquivo de imagem
+	imageUser, _, err := req.FormFile("file")
+	if err != nil {
+		SetResponseError(res, err)
+		return
+	}
+	defer imageUser.Close()
 
-	errInsert := controller.S_Create(customer)
+	// Extrai os demais campos do formulário
+	var customerRequest dto.CreateCustomerRequest
+	customerRequest.FullName = req.FormValue("FullName")
+	customerRequest.Phone = req.FormValue("Phone")
+	customerRequest.Email = req.FormValue("Email")
+	customerRequest.Password = req.FormValue("Password")
+	customerRequest.Document = req.FormValue("Document")
 
+	// Converte o campo Birthday de string para time.Time usando RFC3339
+	birthdayStr := req.FormValue("Birthday")
+	birthday, err := time.Parse(time.RFC3339, birthdayStr) // Formato esperado: YYYY-MM-DDTHH:MM:SS.sssZ
+	if err != nil {
+		SetResponseError(res, err)
+		return
+	}
+	customerRequest.Birthday = birthday
+
+	// Converte o DTO para o modelo de dados
+	var customer models.Customer
+	err = copier.Copy(&customer, &customerRequest)
+	if err != nil {
+		SetResponseError(res, err)
+		return
+	}
+
+	// Chama o serviço para salvar o cliente com a imagem
+	errInsert := controller.S_Create(customer, imageUser)
 	if errInsert != nil {
 		SetResponseError(res, errInsert)
 		return

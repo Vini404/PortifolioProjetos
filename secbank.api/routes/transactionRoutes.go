@@ -27,8 +27,9 @@ func GetTransactionController() controllers.TransactionController {
 	balanceRepository := &repositories.BalanceRepository{sqliteHandler}
 	accountRepository := &repositories.AccountRepository{sqliteHandler}
 	transactionRepository := &repositories.TransactionRepository{sqliteHandler}
+	customerRepository := &repositories.CustomerRepository{sqliteHandler}
 
-	transactionService := &services.TransactionService{accountRepository, balanceRepository, transactionRepository}
+	transactionService := &services.TransactionService{accountRepository, balanceRepository, transactionRepository, customerRepository}
 	transactionController := controllers.TransactionController{transactionService}
 
 	return transactionController

@@ -1,9 +1,12 @@
 package services
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
+	"mime/multipart"
 	"secbank.api/auth"
 	dto "secbank.api/dto/customer"
 	"secbank.api/interfaces/repository"
@@ -24,7 +27,7 @@ func (service *CustomerService) S_List() (*[]models.Customer, error) {
 	return allCustomers, err
 }
 
-func (service *CustomerService) S_Create(customer models.Customer) error {
+func (service *CustomerService) S_Create(customer models.Customer, file multipart.File) error {
 	id, err := service.ICustomerRepository.R_Create(customer)
 
 	if err != nil {
@@ -71,6 +74,36 @@ func (service *CustomerService) S_Create(customer models.Customer) error {
 		return err
 	}
 
+	rekognitionService := NewRekognitionService("us-east-1")
+
+	collectionID := "b7cff507-7306-4c37-a461-0ed736b7cdc5"
+
+	errCreateUserRekognition := rekognitionService.CreateUser(collectionID, id)
+
+	if errCreateUserRekognition != nil {
+		return errCreateUserRekognition
+	}
+
+	imageBytes, errGetImageBytes := getFileBytes(file)
+
+	if errGetImageBytes != nil {
+		return errGetImageBytes
+	}
+
+	indexFaces, errIndexFaces := rekognitionService.IndexFaces(collectionID, imageBytes)
+
+	if errIndexFaces != nil {
+		return errIndexFaces
+	}
+
+	facesIds := rekognitionService.GetFacesIDs(indexFaces)
+
+	errAssociateFacesToUser := rekognitionService.AssociateFacesToUser(collectionID, id, facesIds)
+
+	if errAssociateFacesToUser != nil {
+		return errAssociateFacesToUser
+	}
+
 	return nil
 }
 
@@ -110,11 +143,12 @@ func (service *CustomerService) S_Get(id int) (*models.Customer, error) {
 func (service *CustomerService) S_Auth(request dto.AuthRequest) (*dto.AuthResponse, error) {
 	customer, err := service.ICustomerRepository.R_Get_By_Email(request.Email)
 
-	if err.Error() == "sql: no rows in result set" {
-		return nil, fmt.Errorf("O email ou senha informada estão incorretas")
-	}
-
 	if err != nil {
+
+		if err.Error() != "sql: no rows in result set" {
+			return nil, fmt.Errorf("O email ou senha informada estão incorretas")
+		}
+
 		return nil, err
 	}
 
@@ -138,4 +172,13 @@ func (service *CustomerService) S_Auth(request dto.AuthRequest) (*dto.AuthRespon
 func generate7DigitNumber() int {
 	rand.Seed(time.Now().UnixNano())    // Seed the random number generator
 	return rand.Intn(9000000) + 1000000 // Generates a number between 1,000,000 and 9,999,999
+}
+
+func getFileBytes(file multipart.File) ([]byte, error) {
+	var buf bytes.Buffer
+	_, err := io.Copy(&buf, file)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }

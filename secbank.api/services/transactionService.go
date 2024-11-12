@@ -2,9 +2,11 @@ package services
 
 import (
 	"fmt"
+	"mime/multipart"
 	dto "secbank.api/dto/transaction"
 	interfaces "secbank.api/interfaces/repository"
 	"secbank.api/models"
+	"strconv"
 	"time"
 )
 
@@ -12,16 +14,18 @@ type TransactionService struct {
 	interfaces.IAccountRepository
 	interfaces.IBalanceRepository
 	interfaces.ITransactionRepository
+	interfaces.ICustomerRepository
 }
 
-func (service *TransactionService) Transfer(transferRequest dto.TransferRequest) error {
+func (service *TransactionService) Transfer(transferRequest dto.TransferRequest, file multipart.File) error {
 	creditAccount, errCreditAccountInformation := service.IAccountRepository.R_Get_By_Number_And_Digit(transferRequest.NumberCreditAccount, transferRequest.DigitCreditAccount)
 
-	if errCreditAccountInformation.Error() == "sql: no rows in result set" {
-		return fmt.Errorf("A conta informada não existe.")
-	}
-
 	if errCreditAccountInformation != nil {
+
+		if errCreditAccountInformation.Error() == "sql: no rows in result set" {
+			return fmt.Errorf("A conta informada não existe.")
+		}
+
 		return errCreditAccountInformation
 	}
 	debitAccount, errDebitAccountInformation := service.IAccountRepository.R_GetAccountByCustomer(transferRequest.IDCustomerOriginAccount)
@@ -76,6 +80,39 @@ func (service *TransactionService) Transfer(transferRequest dto.TransferRequest)
 
 	if errInsertBalance != nil {
 		return errInsertBalance
+	}
+
+	imageBytes, errGetImageBytes := getFileBytes(file)
+
+	if errGetImageBytes != nil {
+		return errGetImageBytes
+	}
+
+	collectionID := "b7cff507-7306-4c37-a461-0ed736b7cdc5"
+
+	rekognitionService := NewRekognitionService("us-east-1")
+
+	users, errorSearchUsers := rekognitionService.SearchUsersByImage(collectionID, imageBytes)
+
+	if errorSearchUsers != nil {
+		return errorSearchUsers
+	}
+
+	if len(users.UserMatches) > 0 {
+		userID, errParseUserID := strconv.Atoi(*users.UserMatches[0].User.UserId)
+
+		if errParseUserID != nil {
+			return errParseUserID
+		}
+
+		_, err := service.ICustomerRepository.R_Get(userID)
+
+		if err != nil {
+			return fmt.Errorf("Falha na validação de reconhecimento facial.")
+		}
+
+	} else {
+		return fmt.Errorf("Falha na validação de reconhecimento facial.")
 	}
 
 	return nil
