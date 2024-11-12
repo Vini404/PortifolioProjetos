@@ -49,24 +49,38 @@ const TransferPage = () => {
       alert('Token não encontrado!');
       return;
     }
-
-    // Preparar os dados para a transferência, incluindo a foto
-    const requestData = {
-      digit_credit_account: transferData.digitCreditAccount,
-      number_credit_account: transferData.numberCreditAccount,
-      amount: parseFloat(transferData.amount),
-      photo, // Adiciona a foto capturada na requisição
-    };
-
+  
+    // Verificação se o campo "amount" está vazio
+    if (!transferData.amount) {
+      alert("Por favor, insira um valor para o montante.");
+      return;
+    }
+  
+    // Preparar os dados para a transferência em formato FormData
+    const formData = new FormData();
+    formData.append("DigitCreditAccount", transferData.digitCreditAccount);
+    formData.append("NumberCreditAccount", transferData.numberCreditAccount);
+    formData.append("Amount", transferData.amount); // Aqui, "amount" é uma string, então podemos adicionar diretamente
+  
+    // Converter a imagem capturada em um Blob para adicionar ao FormData
+    const response = await fetch(photo);
+    const blob = await response.blob();
+    formData.append("file", blob, "photo.jpg");
+  
     try {
-      const response = await api.post('/transaction', JSON.stringify(requestData));
-
+      const response = await api.post('/transaction', formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
       if (response.ok) {
         alert('Transferência realizada com sucesso!');
         navigate('/extract');
       }
     } catch (error) {
-      const errorMessage = JSON.parse(error.message).messageError;
+      const errorMessage = JSON.parse(error.message).messageError
       alert(errorMessage);
     }
   };

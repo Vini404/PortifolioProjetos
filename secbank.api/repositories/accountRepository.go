@@ -72,7 +72,8 @@ func (repository *AccountRepository) R_GetInformationAccount(id int) (*dto.Infor
 		SELECT 
 		    concat(a.Number,'-',a.Digit) as AccountNumber, 
 		    c.FullName as CustomerName,
-		    c.ID as CustomerID
+		    c.ID as CustomerID,
+		    a.ID as IDAccount
 			from Account a
 			inner join AccountHolder ah on ah.ID = a.IDAccountHolder
 			inner join customer c on c.ID = ah.IdCustomer

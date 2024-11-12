@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Button, TextField, Box, Typography, Paper } from '@mui/material';
 import { styled } from '@mui/system';
-import api from '../api/axiosBase'
+import api from '../api/axiosBase';
+import Webcam from 'react-webcam';
 
 const Background = styled(Box)({
   background: '#f5f5f5',
@@ -36,6 +37,7 @@ const StyledButton = styled(Button)(({ error }) => ({
 }));
 
 const RegisterPage = () => {
+  const [activeStep, setActiveStep] = useState(0);
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -46,33 +48,56 @@ const RegisterPage = () => {
   const [passwordError, setPasswordError] = useState(false);
   const [registrationError, setRegistrationError] = useState('');
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [photo, setPhoto] = useState(null);
 
-  const handleRegister = async () => {
+  const webcamRef = useRef(null);
+
+  // Captura a imagem da webcam e converte para Blob
+  const handleCapture = useCallback(() => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    fetch(imageSrc)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
+        setPhoto(file);
+      });
+  }, [webcamRef]);
+
+  const handleRetake = () => {
+    setPhoto(null); // Permite ao usuário tentar capturar uma nova foto
+  };
+
+  const handleNextStep = () => {
     if (password !== confirmPassword) {
       setPasswordError(true);
       return;
     }
+    setActiveStep(1); // Avança para a etapa de captura de foto
+  };
 
-    // Formatação dos dados para o contrato
-    const requestData = {
-      FullName: fullName,
-      Phone: phone,
-      Email: email,
-      Birthday: new Date(birthday).toISOString(),
-      Password: password,
-      Document: document,
-    };
+  const handleRegister = async () => {
+    const formData = new FormData();
+    formData.append('FullName', fullName);
+    formData.append('Phone', phone);
+    formData.append('Email', email);
+    formData.append('Birthday', new Date(birthday).toISOString());
+    formData.append('Password', password);
+    formData.append('Document', document);
+    formData.append('file', photo); // Adiciona a foto capturada ao FormData
 
     try {
-      const response = await api.post('/customer', JSON.stringify(requestData));
-
+      const response = await api.post('/customer', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       if (response.ok) {
         setRegistrationSuccess(true);
         setRegistrationError('');
         alert('Usuário registrado com sucesso!');
       }
     } catch (error) {
-      const errorMessage = JSON.parse(error.message).messageError
+      const errorMessage = JSON.parse(error.message).messageError;
       alert(errorMessage);
     }
   };
@@ -83,102 +108,140 @@ const RegisterPage = () => {
         <Typography variant="h4" gutterBottom color="primary" fontWeight="bold">
           Registrar
         </Typography>
-        <TextField
-          label="Nome Completo"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          InputProps={{
-            style: { borderRadius: '10px' },
-          }}
-        />
-        <TextField
-          label="Telefone"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          InputProps={{
-            style: { borderRadius: '10px' },
-          }}
-        />
-        <TextField
-          label="Email"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          InputProps={{
-            style: { borderRadius: '10px' },
-          }}
-        />
-        <TextField
-          label="Documento"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          value={document}
-          onChange={(e) => setDocument(e.target.value)}
-          InputProps={{
-            style: { borderRadius: '10px' },
-          }}
-        />
-        <TextField
-          label="Senha"
-          variant="outlined"
-          type="password"
-          fullWidth
-          margin="normal"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          InputProps={{
-            style: { borderRadius: '10px' },
-          }}
-        />
-        <TextField
-          label="Confirmar Senha"
-          variant="outlined"
-          type="password"
-          fullWidth
-          margin="normal"
-          value={confirmPassword}
-          onChange={(e) => {
-            setConfirmPassword(e.target.value);
-            setPasswordError(false);
-          }}
-          InputProps={{
-            style: { borderRadius: '10px' },
-          }}
-          error={passwordError}
-          helperText={passwordError && 'As senhas não coincidem'}
-        />
-        <TextField
-          label="Data de Nascimento"
-          variant="outlined"
-          type="date"
-          fullWidth
-          margin="normal"
-          value={birthday}
-          onChange={(e) => setBirthday(e.target.value)}
-          InputLabelProps={{
-            shrink: true,
-          }}
-          InputProps={{
-            style: { borderRadius: '10px' },
-          }}
-        />
-        <StyledButton
-          variant="contained"
-          onClick={handleRegister}
-          fullWidth
-          error={passwordError}
-        >
-          Registrar
-        </StyledButton>
+        {activeStep === 0 ? (
+          // Etapa 1: Formulário de Registro
+          <>
+            <TextField
+              label="Nome Completo"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              InputProps={{
+                style: { borderRadius: '10px' },
+              }}
+            />
+            <TextField
+              label="Telefone"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              InputProps={{
+                style: { borderRadius: '10px' },
+              }}
+            />
+            <TextField
+              label="Email"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              InputProps={{
+                style: { borderRadius: '10px' },
+              }}
+            />
+            <TextField
+              label="Documento"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={document}
+              onChange={(e) => setDocument(e.target.value)}
+              InputProps={{
+                style: { borderRadius: '10px' },
+              }}
+            />
+            <TextField
+              label="Senha"
+              variant="outlined"
+              type="password"
+              fullWidth
+              margin="normal"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              InputProps={{
+                style: { borderRadius: '10px' },
+              }}
+            />
+            <TextField
+              label="Confirmar Senha"
+              variant="outlined"
+              type="password"
+              fullWidth
+              margin="normal"
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setPasswordError(false);
+              }}
+              InputProps={{
+                style: { borderRadius: '10px' },
+              }}
+              error={passwordError}
+              helperText={passwordError && 'As senhas não coincidem'}
+            />
+            <TextField
+              label="Data de Nascimento"
+              variant="outlined"
+              type="date"
+              fullWidth
+              margin="normal"
+              value={birthday}
+              onChange={(e) => setBirthday(e.target.value)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              InputProps={{
+                style: { borderRadius: '10px' },
+              }}
+            />
+            <StyledButton
+              variant="contained"
+              onClick={handleNextStep}
+              fullWidth
+              error={passwordError}
+            >
+              Próximo
+            </StyledButton>
+          </>
+        ) : (
+          // Etapa 2: Captura de Foto
+          <>
+            <Typography variant="h6" gutterBottom>
+              Verificação de Identidade
+            </Typography>
+            {!photo ? (
+              <Box>
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  width="100%"
+                />
+                <Button variant="contained" color="primary" onClick={handleCapture} sx={{ mt: 2 }}>
+                  Tirar Foto
+                </Button>
+              </Box>
+            ) : (
+              <Box mt={2} textAlign="center">
+                <Typography>Foto Capturada:</Typography>
+                <img src={URL.createObjectURL(photo)} alt="Foto capturada" style={{ width: '100%', maxWidth: '300px' }} />
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                  <Button variant="contained" color="secondary" onClick={handleRetake}>
+                    Nova Tentativa
+                  </Button>
+                  <Button variant="contained" color="primary" onClick={handleRegister} sx={{ ml: 2 }}>
+                    Confirmar Registro
+                  </Button>
+                </Box>
+              </Box>
+            )}
+          </>
+        )}
         {registrationError && (
           <Typography color="error" sx={{ mt: 2 }}>
             {registrationError}

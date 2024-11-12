@@ -1,8 +1,21 @@
-import React from 'react';
-import { AppBar, Toolbar, Typography, IconButton, Box, Drawer, List, ListItem, ListItemText, CssBaseline } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Box,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  CssBaseline,
+  CircularProgress,
+} from '@mui/material';
 import { styled } from '@mui/system';
 import MenuIcon from '@mui/icons-material/Menu';
-import TransferPage from './TransferPage'; // Certifique-se de que o caminho está correto
+import TransferPage from './TransferPage';
+import api from '../api/axiosBase';
 
 const drawerWidth = 240;
 
@@ -22,12 +35,14 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
       }),
       marginLeft: 0,
     }),
-  }),
+  })
 );
 
 const DashboardPage = () => {
-  const [open, setOpen] = React.useState(false);
-  const [currentPage, setCurrentPage] = React.useState('Transfer');
+  const [open, setOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState('Transfer');
+  const [balance, setBalance] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -51,6 +66,46 @@ const DashboardPage = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchBalance = async () => {
+      setLoading(true);
+      try {
+        // Obter o CustomerID
+        const customerResponse = await api.get('/customer/info');
+        if (!customerResponse.data.success) {
+          alert('Erro ao obter informações do cliente');
+          return;
+        }
+
+        const customerID = customerResponse.data.data.ID;
+
+        // Obter o AccountID
+        const accountResponse = await api.get(`/account/${customerID}/information`);
+        if (!accountResponse.data.success) {
+          alert('Erro ao obter informações da conta');
+          return;
+        }
+
+        const accountID = accountResponse.data.data.IDAccount;
+
+        // Obter o saldo
+        const balanceResponse = await api.get(`/balance/${accountID}`);
+        if (!balanceResponse.data.success) {
+          alert('Erro ao obter saldo');
+          return;
+        }
+
+        setBalance(balanceResponse.data.data.Amount);
+      } catch (error) {
+        alert(error.response?.data?.messageError || 'Erro ao buscar o saldo');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBalance();
+  }, []);
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -62,6 +117,13 @@ const DashboardPage = () => {
           <Typography variant="h6" noWrap component="div">
             Dashboard
           </Typography>
+          <Box sx={{ marginLeft: 'auto' }}>
+            {loading ? (
+              <CircularProgress color="inherit" size={24} />
+            ) : (
+              <Typography variant="h6">Saldo disponível: R$ {balance}</Typography>
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
       <Drawer
