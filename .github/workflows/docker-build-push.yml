@@ -1,4 +1,4 @@
-name: Build and Push Docker Image to ECR
+name: Build, Push Docker Image, and Deploy to ECS
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  build-and-push:
-    name: Build and Push Docker Image
+  build-push-deploy:
+    name: Build, Push, and Deploy
     runs-on: ubuntu-latest
 
     steps:
@@ -29,3 +29,14 @@ jobs:
       - name: Push Docker Image to ECR
         run: |
           docker push 400768006621.dkr.ecr.us-east-1.amazonaws.com/secbank:latest
+
+      - name: Force New Deployment on ECS
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          aws ecs update-service \
+            --cluster SecBankCluster \
+            --service SecBankApi \
+            --force-new-deployment
