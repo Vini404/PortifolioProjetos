@@ -1,0 +1,31 @@
+name: Build and Push Docker Image to ECR
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Login to AWS ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker Image
+        run: |
+          docker build -t secbank . -f secbank.api/Dockerfile
+
+      - name: Tag Docker Image
+        run: |
+          docker tag secbank:latest 400768006621.dkr.ecr.us-east-1.amazonaws.com/secbank:latest
+
+      - name: Push Docker Image to ECR
+        run: |
+          docker push 400768006621.dkr.ecr.us-east-1.amazonaws.com/secbank:latest

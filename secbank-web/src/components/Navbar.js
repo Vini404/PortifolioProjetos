@@ -8,9 +8,6 @@ const Navbar = () => {
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Sec Bank
         </Typography>
-        <IconButton  color="inherit">
-          <Avatar alt="Usuário" src="/static/images/avatar/1.jpg" />
-        </IconButton>
       </Toolbar>
     </AppBar>
   );
