@@ -13,10 +13,11 @@ jobs:
 
     steps:
 
-      - name: Set and Use an Environment Variable
-        run: |
-          export AWS_REGION="us-east-1"
-          echo "The value of AWS_REGION is $AWS_REGION"
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          mask-aws-account-id: 'false'
 
       - name: Checkout Code
         uses: actions/checkout@v3
