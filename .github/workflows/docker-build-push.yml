@@ -33,8 +33,8 @@ jobs:
         with:
           projectBaseDir: ./secbank.api
           args: >
-            -Dsonar.projectKey=PortifolioProjetos
-            -Dsonar.organization=Vini404
+            -Dsonar.projectKey=Vini404
+            -Dsonar.organization=PortifolioProjetos
             -Dsonar.host.url=https://sonarcloud.io
 
       # Step 4: Login to AWS ECR
