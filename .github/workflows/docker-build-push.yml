@@ -29,7 +29,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t secbank . -f secbank.api/Dockerfile
+          docker build -t secbank -f secbank.api/Dockerfile ./secbank.api
 
       - name: Tag Docker Image
         run: |
