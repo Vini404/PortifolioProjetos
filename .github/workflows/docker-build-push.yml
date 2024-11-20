@@ -12,6 +12,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+      - name: Set and Use an Environment Variable
+        run: |
+          export AWS_REGION="us-east-1"
+          echo "The value of AWS_REGION is $AWS_REGION"
+
       - name: Checkout Code
         uses: actions/checkout@v3
 
