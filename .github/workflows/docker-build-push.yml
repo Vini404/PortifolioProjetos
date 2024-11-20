@@ -36,6 +36,8 @@ jobs:
             -Dsonar.projectKey=Vini404_PortifolioProjetos
             -Dsonar.organization=Vini404
             -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.branch.name=${{ github.ref_name }}
+            -X
 
       # Step 4: Login to AWS ECR
       - name: Login to AWS ECR
