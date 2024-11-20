@@ -25,37 +25,44 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 3: Run SonarCloud Analysis
+      # Step 3: Install SonarScanner
+      - name: Install SonarScanner
+        run: |
+          curl -sSfL https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip -o sonar-scanner.zip
+          unzip sonar-scanner.zip -d $HOME
+          echo "export PATH=$PATH:$HOME/sonar-scanner-4.8.0.2856-linux/bin" >> $GITHUB_ENV
+
+      # Step 4: Run SonarCloud Analysis
       - name: Run SonarCloud Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=your_project_key \
-            -Dsonar.organization=your_organization_key \
+            -Dsonar.projectKey=PortifolioProjetos \
+            -Dsonar.organization=Vini404 \
             -Dsonar.host.url=https://sonarcloud.io
 
-      # Step 4: Login to AWS ECR
+      # Step 5: Login to AWS ECR
       - name: Login to AWS ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      # Step 5: Build Docker Image
+      # Step 6: Build Docker Image
       - name: Build Docker Image
         run: |
           docker build -t secbank -f secbank.api/Dockerfile ./secbank.api
 
-      # Step 6: Tag Docker Image
+      # Step 7: Tag Docker Image
       - name: Tag Docker Image
         run: |
           docker tag secbank:latest 400768006621.dkr.ecr.us-east-1.amazonaws.com/secbank:latest
 
-      # Step 7: Push Docker Image to ECR
+      # Step 8: Push Docker Image to ECR
       - name: Push Docker Image to ECR
         run: |
           docker push 400768006621.dkr.ecr.us-east-1.amazonaws.com/secbank:latest
 
-      # Step 8: Force New Deployment on ECS
+      # Step 9: Force New Deployment on ECS
       - name: Force New Deployment on ECS
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
