@@ -28,9 +28,9 @@ jobs:
       # Step 3: Configure SonarCloud Analysis
       - name: Set up SonarCloud
         uses: sonarsource/sonarcloud-github-action@v2
-        with:
-          token: ${{ secrets.SONAR_TOKEN }}
-
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          
       # Step 4: Run SonarCloud Analysis
       - name: Run SonarCloud Analysis
         env:
