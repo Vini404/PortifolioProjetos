@@ -33,7 +33,7 @@ jobs:
         with:
           projectBaseDir: ./secbank.api
           args: >
-            -Dsonar.projectKey=PortifolioProjetos
+            -Dsonar.projectKey=Vini404/PortifolioProjetos
             -Dsonar.organization=Vini404
             -Dsonar.host.url=https://sonarcloud.io
 
