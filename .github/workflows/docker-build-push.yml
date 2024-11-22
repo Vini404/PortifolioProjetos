@@ -42,7 +42,6 @@ jobs:
           go test ./... -coverprofile=coverage.out
           go install github.com/t-yuki/gocover-cobertura@latest
           gocover-cobertura < coverage.out > coverage.xml
-          ls
 
       # Step 6: Run SonarCloud Analysis using SonarQube Action
       - name: Run SonarCloud Analysis
