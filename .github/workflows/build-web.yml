@@ -60,7 +60,7 @@ jobs:
       # Step 7: Deploy to S3
       - name: Deploy to S3
         run: |
-          aws s3 sync ./secbank-web/.dist s3://secbank.vinilab.dev \
+          aws s3 sync ./secbank-web/build s3://secbank.vinilab.dev \
             --delete \
             --acl public-read
 
