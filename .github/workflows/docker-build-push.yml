@@ -32,6 +32,7 @@ jobs:
 
       # Step 4: Install Dependencies
       - name: Install Dependencies
+        working-directory: ./secbank.api
         run: go mod tidy
 
       # Step 5: Run Tests and Generate Code Coverage
