@@ -1,0 +1,71 @@
+name: Build, Deploy Web Project, and Invalidate Cache
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-deploy-web:
+    name: Build and Deploy Web Project
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Step 2: Checkout Code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 3: Run SonarCloud Analysis
+      - name: Run SonarCloud Analysis
+        uses: sonarsource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: ./secbank-web
+          args: >
+            -Dsonar.projectKey=Vini404_PortifolioProjetos
+            -Dsonar.organization=vini404
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.branch.name=${{ github.ref_name }}
+            -Dsonar.sources=src # Pasta de fontes a ser analisada
+            -Dsonar.coverage.exclusions=**/*.test.js,**/__mocks__/** # Exclui testes e mocks
+            -X
+
+      # Step 4: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Substitua pela versão necessária
+
+      # Step 5: Install Dependencies
+      - name: Install Dependencies
+        working-directory: ./secbank-web
+        run: npm install
+
+      # Step 6: Build Project
+      - name: Build Project
+        working-directory: ./secbank-web
+        run: npm run build
+
+      # Step 7: Deploy to S3
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./secbank-web/.dist s3://secbank.vinilab.dev \
+            --delete \
+            --acl public-read
+
+      # Step 8: Invalidate CloudFront Cache
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E309XRA2JA97B3 \
+            --paths "/*"

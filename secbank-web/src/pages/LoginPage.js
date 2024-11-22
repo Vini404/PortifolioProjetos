@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Button, TextField, Box, Typography, Paper, CircularProgress } from '@mui/material';
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
-import api from '../api/axiosBase'
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import api from '../api/axiosBase';
 
 const Background = styled(Box)({
   background: '#f5f5f5',
@@ -39,30 +41,26 @@ const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     setLoading(true);
-    setError('');
 
     try {
-      const response = await api.post('/login',
-        JSON.stringify({ email, password })
-      );
-      
-      var result = response.result
+      const response = await api.post('/login', JSON.stringify({ email, password }));
+      const result = response.result;
 
       if (response.ok) {
         localStorage.clear();
-        console.log(result)
         localStorage.setItem('token', result.data.token);
+        toast.success('Login realizado com sucesso!');
         navigate('/home');
+      } else {
+        toast.error('Erro ao realizar login. Verifique suas credenciais.');
       }
-
     } catch (error) {
-      const errorMessage = JSON.parse(error.message).messageError
-      alert(errorMessage);
+      const errorMessage = JSON.parse(error.message).messageError || 'Erro ao realizar login';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -78,6 +76,17 @@ const LoginPage = () => {
 
   return (
     <Background>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <LoginPaper elevation={6}>
         <Typography variant="h4" gutterBottom color="primary" fontWeight="bold">
           Acesse sua Conta
@@ -111,11 +120,6 @@ const LoginPage = () => {
           <StyledButton variant="contained" onClick={handleLogin} fullWidth>
             Entrar
           </StyledButton>
-        )}
-        {error && (
-          <Typography color="error" sx={{ mt: 2 }}>
-            {error}
-          </Typography>
         )}
         <Typography
           variant="body2"

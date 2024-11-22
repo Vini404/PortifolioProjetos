@@ -7,9 +7,11 @@ import {
   Grid,
   IconButton,
   CircularProgress,
-  Tooltip
+  Tooltip,
 } from '@mui/material';
 import { styled } from '@mui/system';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import SendIcon from '@mui/icons-material/Send';
 import EditIcon from '@mui/icons-material/Edit';
@@ -81,14 +83,14 @@ const Home = () => {
       try {
         const customerResponse = await api.get('/customer/info');
         if (!customerResponse.ok) {
-          alert('Erro ao obter informações do cliente');
+          toast.error('Erro ao obter informações do cliente');
           return;
         }
         const customerID = customerResponse.result.data.ID;
 
         const accountResponse = await api.get(`/account/${customerID}/information`);
         if (!accountResponse.ok) {
-          alert('Erro ao obter informações da conta');
+          toast.error('Erro ao obter informações da conta');
           return;
         }
         const accountID = accountResponse.result.data.IDAccount;
@@ -97,13 +99,15 @@ const Home = () => {
 
         const balanceResponse = await api.get(`/balance/${accountID}`);
         if (!balanceResponse.ok) {
-          alert('Erro ao obter saldo');
+          toast.error('Erro ao obter saldo');
           return;
         }
         setBalance(balanceResponse.result.data.Amount);
+
+        toast.success('Dados carregados com sucesso!');
       } catch (error) {
         const errorMessage = JSON.parse(error.message).messageError || 'Erro ao buscar o saldo';
-        alert(errorMessage);
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -115,7 +119,8 @@ const Home = () => {
   const handleCopy = () => {
     navigator.clipboard.writeText(accountNumber).then(() => {
       setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000); 
+      toast.success('Número da conta copiado!');
+      setTimeout(() => setCopySuccess(false), 2000);
     });
   };
 
@@ -125,6 +130,17 @@ const Home = () => {
 
   return (
     <MainContent>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <Navbar />
       <Sidebar />
       <BalancePaper elevation={3}>
@@ -142,7 +158,7 @@ const Home = () => {
               <Typography variant="h4" sx={{ color: '#303f9f', fontWeight: 'bold', mr: 2 }}>
                 Conta: {accountNumber}
               </Typography>
-              <Tooltip title={copySuccess ? "Copiado!" : "Copiar"}>
+              <Tooltip title={copySuccess ? 'Copiado!' : 'Copiar'}>
                 <IconButton onClick={handleCopy} sx={{ color: '#303f9f' }}>
                   <ContentCopyIcon />
                 </IconButton>

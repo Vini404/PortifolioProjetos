@@ -1,10 +1,12 @@
 import React, { useState, useRef, useCallback } from 'react';
 import {
-  Box, Button, TextField, Typography, Paper, Stepper, Step, StepLabel,
+  Box, Button, TextField, Typography, Paper, Stepper, Step, StepLabel, Grid,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import api from '../api/axiosBase';
 import Webcam from 'react-webcam';
 
@@ -15,7 +17,7 @@ const TransferPage = () => {
     numberCreditAccount: '',
     digitCreditAccount: '',
   });
-  const [photo, setPhoto] = useState(null); // Guarda a foto capturada
+  const [photo, setPhoto] = useState(null);
 
   const webcamRef = useRef(null);
   const navigate = useNavigate();
@@ -31,59 +33,68 @@ const TransferPage = () => {
   };
 
   const handleChange = (e) => {
-    setTransferData({ ...transferData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'amount') {
+      // Formatando o valor com separador de milhar
+      const formattedValue = value.replace(/\D/g, '').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+      setTransferData({ ...transferData, [name]: formattedValue });
+    } else {
+      setTransferData({ ...transferData, [name]: value });
+    }
   };
 
   const handleCapture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
-    setPhoto(imageSrc); // Salva a imagem capturada no estado
+    setPhoto(imageSrc);
   }, [webcamRef]);
 
   const handleRetake = () => {
-    setPhoto(null); // Limpa a foto capturada para permitir uma nova tentativa
+    setPhoto(null);
   };
 
   const handleConfirm = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('Token não encontrado!');
+      toast.error('Token não encontrado!');
       return;
     }
   
-    // Verificação se o campo "amount" está vazio
     if (!transferData.amount) {
-      alert("Por favor, insira um valor para o montante.");
+      toast.error('Por favor, insira um valor para o montante.');
       return;
     }
   
-    // Preparar os dados para a transferência em formato FormData
     const formData = new FormData();
-    formData.append("DigitCreditAccount", transferData.digitCreditAccount);
-    formData.append("NumberCreditAccount", transferData.numberCreditAccount);
-    formData.append("Amount", transferData.amount); // Aqui, "amount" é uma string, então podemos adicionar diretamente
-  
-    // Converter a imagem capturada em um Blob para adicionar ao FormData
-    const response = await fetch(photo);
-    const blob = await response.blob();
-    formData.append("file", blob, "photo.jpg");
+    formData.append('DigitCreditAccount', transferData.digitCreditAccount);
+    formData.append('NumberCreditAccount', transferData.numberCreditAccount);
+    // Remover vírgulas antes de enviar o valor para o backend
+    const formattedAmount = transferData.amount.replace(/\D/g, '');
+    formData.append('Amount', formattedAmount);
   
     try {
+      const responseBlob = await fetch(photo);
+      const blob = await responseBlob.blob();
+      formData.append('file', blob, 'photo.jpg');
+  
       const response = await api.post('/transaction', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
   
       if (response.ok) {
-        alert('Transferência realizada com sucesso!');
+        toast.success('Transferência realizada com sucesso!');
         navigate('/extract');
+      } else {
+        toast.error('Erro ao realizar a transferência.');
       }
     } catch (error) {
-      const errorMessage = JSON.parse(error.message).messageError
-      alert(errorMessage);
+      const errorMessage = JSON.parse(error.message)?.messageError || 'Erro inesperado.';
+      toast.error(errorMessage);
     }
   };
+  
 
   const renderStepContent = (step) => {
     switch (step) {
@@ -95,38 +106,42 @@ const TransferPage = () => {
             fullWidth
             margin="normal"
             name="amount"
-            value={transferData.amount}
+            value={`R$ ${transferData.amount}`} // Adicionando o símbolo de real
             onChange={handleChange}
-            type="number"
+            type="text"
             required
           />
         );
       case 1:
         return (
-          <>
-            <TextField
-              label="Número da Conta de Destino"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              name="numberCreditAccount"
-              value={transferData.numberCreditAccount}
-              onChange={handleChange}
-              inputProps={{ maxLength: 7 }}
-              required
-            />
-            <TextField
-              label="Dígito da Conta de Destino"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              name="digitCreditAccount"
-              value={transferData.digitCreditAccount}
-              onChange={handleChange}
-              inputProps={{ maxLength: 1 }}
-              required
-            />
-          </>
+          <Grid container spacing={2}>
+            <Grid item xs={9}>
+              <TextField
+                label="Número da Conta de Destino"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                name="numberCreditAccount"
+                value={transferData.numberCreditAccount}
+                onChange={handleChange}
+                inputProps={{ maxLength: 7 }}
+                required
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <TextField
+                label="Dígito"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                name="digitCreditAccount"
+                value={transferData.digitCreditAccount}
+                onChange={handleChange}
+                inputProps={{ maxLength: 1 }}
+                required
+              />
+            </Grid>
+          </Grid>
         );
       case 2:
         return (
@@ -138,14 +153,22 @@ const TransferPage = () => {
               <strong>Para:</strong> Conta {transferData.numberCreditAccount}-{transferData.digitCreditAccount}
             </Typography>
             <Typography variant="body1">
-              <strong>Valor:</strong> R$ {parseFloat(transferData.amount).toFixed(2)}
+              <strong>Valor:</strong> R$ {transferData.amount}
             </Typography>
           </Box>
         );
       case 3:
         return (
-          <Box>
-            <Typography variant="h6" gutterBottom>
+          <Box textAlign="center">
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{
+                color: '#303f9f', // Cor azul predominante
+                fontWeight: 'bold',
+                mb: 2,
+              }}
+            >
               Verificação de Identidade
             </Typography>
             {!photo ? (
@@ -164,7 +187,16 @@ const TransferPage = () => {
               </Box>
             ) : (
               <Box mt={2} textAlign="center">
-                <Typography>Foto Capturada:</Typography>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    color: '#303f9f', // Cor azul predominante
+                    fontWeight: 'bold',
+                    mb: 2,
+                  }}
+                >
+                  Foto Capturada
+                </Typography>
                 <img src={photo} alt="Foto capturada" style={{ width: '100%', maxWidth: '300px' }} />
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
                   <Button variant="contained" color="secondary" onClick={handleRetake}>
@@ -191,6 +223,17 @@ const TransferPage = () => {
         backgroundColor: '#f5f5f5',
       }}
     >
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <Navbar />
       <Sidebar />
       <Paper sx={{ p: 4, maxWidth: 600 }}>

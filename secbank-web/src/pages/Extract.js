@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableFooter, Button
+  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button,
 } from '@mui/material';
 import { styled } from '@mui/system';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import api from '../api/axiosBase';
@@ -33,14 +35,14 @@ const Extract = () => {
     const fetchExtractData = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('Token não encontrado!');
+        toast.error('Token não encontrado!');
         return;
       }
 
       try {
         const userInfoResponse = await api.get('/customer/info');
         if (!userInfoResponse.ok) {
-          alert('Erro ao obter informações do usuário');
+          toast.error('Erro ao obter informações do usuário');
           return;
         }
 
@@ -48,7 +50,7 @@ const Extract = () => {
 
         const extractResponse = await api.get(`/balance/extract/${accountId}`);
         if (!extractResponse.ok) {
-          alert('Erro ao obter extrato');
+          toast.error('Erro ao obter extrato');
           return;
         }
 
@@ -63,9 +65,11 @@ const Extract = () => {
 
         const balance = transactionList.reduce((acc, transaction) => acc + transaction.amount, 0);
         setTotalBalance(balance);
+
+        toast.success('Dados carregados com sucesso!');
       } catch (error) {
         const errorMessage = JSON.parse(error.message).messageError;
-        alert(errorMessage);
+        toast.error(errorMessage || 'Erro inesperado');
       } finally {
         setLoading(false);
       }
@@ -80,6 +84,17 @@ const Extract = () => {
 
   return (
     <PageContainer>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <Navbar />
       <Sidebar />
       <TransactionsPaper elevation={6}>

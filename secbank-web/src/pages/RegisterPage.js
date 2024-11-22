@@ -1,8 +1,10 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Button, TextField, Box, Typography, Paper } from '@mui/material';
 import { styled } from '@mui/system';
-import api from '../api/axiosBase';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Webcam from 'react-webcam';
+import api from '../api/axiosBase';
 
 const Background = styled(Box)({
   background: '#f5f5f5',
@@ -46,8 +48,6 @@ const RegisterPage = () => {
   const [birthday, setBirthday] = useState('');
   const [document, setDocument] = useState('');
   const [passwordError, setPasswordError] = useState(false);
-  const [registrationError, setRegistrationError] = useState('');
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [photo, setPhoto] = useState(null);
 
   const webcamRef = useRef(null);
@@ -56,9 +56,9 @@ const RegisterPage = () => {
   const handleCapture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
     fetch(imageSrc)
-      .then(res => res.blob())
-      .then(blob => {
-        const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
+      .then((res) => res.blob())
+      .then((blob) => {
+        const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' });
         setPhoto(file);
       });
   }, [webcamRef]);
@@ -70,6 +70,7 @@ const RegisterPage = () => {
   const handleNextStep = () => {
     if (password !== confirmPassword) {
       setPasswordError(true);
+      toast.error('As senhas não coincidem!');
       return;
     }
     setActiveStep(1); // Avança para a etapa de captura de foto
@@ -92,18 +93,29 @@ const RegisterPage = () => {
         },
       });
       if (response.ok) {
-        setRegistrationSuccess(true);
-        setRegistrationError('');
-        alert('Usuário registrado com sucesso!');
+        toast.success('Usuário registrado com sucesso!');
+      } else {
+        toast.error('Erro ao registrar o usuário.');
       }
     } catch (error) {
-      const errorMessage = JSON.parse(error.message).messageError;
-      alert(errorMessage);
+      const errorMessage = JSON.parse(error.message).messageError || 'Erro inesperado.';
+      toast.error(errorMessage);
     }
   };
 
   return (
     <Background>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <RegisterPaper elevation={6}>
         <Typography variant="h4" gutterBottom color="primary" fontWeight="bold">
           Registrar
@@ -241,16 +253,6 @@ const RegisterPage = () => {
               </Box>
             )}
           </>
-        )}
-        {registrationError && (
-          <Typography color="error" sx={{ mt: 2 }}>
-            {registrationError}
-          </Typography>
-        )}
-        {registrationSuccess && (
-          <Typography color="primary" sx={{ mt: 2 }}>
-            Registro bem-sucedido!
-          </Typography>
         )}
       </RegisterPaper>
     </Background>

@@ -1,24 +1,33 @@
-import React from 'react';
-import { List, ListItem, ListItemIcon, ListItemText, Drawer } from '@mui/material';
+import React, { useState } from 'react';
+import { List, ListItem, ListItemIcon, ListItemText, Drawer, Typography, Box } from '@mui/material';
 import { Home, AccountBalance, Payment, ExitToApp } from '@mui/icons-material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
 import { styled } from '@mui/system';
-import UserProfileEdit from '../pages/UserProfileEdit';
 
 const DrawerContainer = styled(Drawer)(({ theme }) => ({
   '& .MuiDrawer-paper': {
-    width: 240,
+    width: 280,
     boxSizing: 'border-box',
-    backgroundColor: theme.palette.background.default,
+    backgroundColor: '#f5f5f5', // Fundo claro
+    color: '#5c5c5c', // Texto em cinza escuro
     borderRight: '1px solid #e0e0e0',
-    paddingTop: '10px', // Adiciona padding-top de 10 pixels
-    marginTop: '50px', // Adiciona margin-top de 50 pixels
+    paddingTop: theme.spacing(2),
+  },
+}));
+
+const ListItemStyled = styled(ListItem)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+  borderRadius: theme.shape.borderRadius,
+  transition: 'background-color 0.3s ease', // Suaviza a mudança no item ativo e no hover
+  '&:hover': {
+    backgroundColor: '#dcdcdc', // Escurece levemente no hover
   },
 }));
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const [selectedItem, setSelectedItem] = useState('Home'); // "Home" selecionado por padrão
 
   const menuItems = [
     { text: 'Home', icon: <Home />, path: '/home' },
@@ -35,21 +44,38 @@ const Sidebar = () => {
         flexShrink: 0,
       }}
     >
-      <List>
+      <Box sx={{ textAlign: 'center', padding: '20px 0' }}>
+        <Typography variant="h6" fontWeight="bold" color="#000">
+          Sec Bank
+        </Typography>
+      </Box>
+      <List sx={{ padding: '0 20px' }}>
         {menuItems.map((item) => (
-          <ListItem
+          <ListItemStyled
             button
             key={item.text}
-            onClick={() => navigate(item.path)}
+            onClick={() => {
+              setSelectedItem(item.text);
+              navigate(item.path);
+            }}
             sx={{
-              '&:hover': {
-                backgroundColor: '#f5f5f5', // Cor de fundo ao passar o mouse
-              },
+              color: selectedItem === item.text ? '#000' : '#5c5c5c', // Texto preto no item ativo
             }}
           >
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.text} />
-          </ListItem>
+            <ListItemIcon
+              sx={{
+                color: selectedItem === item.text ? '#000' : '#5c5c5c', // Ícones do item ativo em preto
+              }}
+            >
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText
+              primary={item.text}
+              primaryTypographyProps={{
+                fontWeight: selectedItem === item.text ? 'bold' : 'normal',
+              }}
+            />
+          </ListItemStyled>
         ))}
       </List>
     </DrawerContainer>

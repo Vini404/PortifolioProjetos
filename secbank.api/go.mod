@@ -3,6 +3,7 @@ module secbank.api
 go 1.22.5
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/aws/aws-sdk-go v1.55.5
 	github.com/doug-martin/goqu/v9 v9.19.0
 	github.com/go-chi/chi v1.5.5

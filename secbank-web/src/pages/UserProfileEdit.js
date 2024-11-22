@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Button, TextField, Typography, Paper, Box, InputAdornment
+  Button, TextField, Typography, Paper, Box, InputAdornment,
 } from '@mui/material';
 import { styled } from '@mui/system';
 import { isValidPhoneNumber } from 'libphonenumber-js';
 import dayjs from 'dayjs';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
-import api from '../api/axiosBase'
-
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import api from '../api/axiosBase';
 
 const FormContainer = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -45,11 +46,13 @@ const UserProfileEdit = () => {
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('token');
-    if (!token) return alert("Token não encontrado");
+    if (!token) {
+      toast.error('Token não encontrado.');
+      return;
+    }
 
     try {
-      const response = (await api.get('/customer/info'));
-      
+      const response = await api.get('/customer/info');
       if (response.ok) {
         const data = response.result.data;
         setUserData({
@@ -63,12 +66,12 @@ const UserProfileEdit = () => {
           updatedTimeStamp: data.UpdatedTimeStamp || '',
         });
       } else {
-        alert(response.messageError || 'Erro ao carregar dados do usuário');
+        toast.error(response.messageError || 'Erro ao carregar dados do usuário.');
       }
     } catch (error) {
-      const errorMessage = JSON.parse(error.message).messageError
-      alert(errorMessage);
-    }finally {
+      const errorMessage = JSON.parse(error.message)?.messageError || 'Erro inesperado.';
+      toast.error(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
@@ -81,9 +84,7 @@ const UserProfileEdit = () => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
 
-  const validatePhone = (phone) => {
-    return isValidPhoneNumber(phone, 'BR');
-  };
+  const validatePhone = (phone) => isValidPhoneNumber(phone, 'BR');
 
   const isUnderage = (date) => {
     const today = dayjs();
@@ -107,7 +108,10 @@ const UserProfileEdit = () => {
 
     if (Object.keys(newErrors).length === 0) {
       const token = localStorage.getItem('token');
-      if (!token) return alert("Token não encontrado");
+      if (!token) {
+        toast.error('Token não encontrado.');
+        return;
+      }
 
       const requestData = {
         ID: userData.id,
@@ -123,12 +127,13 @@ const UserProfileEdit = () => {
         const response = await api.put('/customer', JSON.stringify(requestData));
 
         if (response.ok) {
-          alert('Dados atualizados com sucesso!');
+          toast.success('Dados atualizados com sucesso!');
         } else {
-          alert('Erro ao atualizar dados');
+          toast.error('Erro ao atualizar dados.');
         }
       } catch (error) {
-        console.error('Erro ao atualizar dados:', error);
+        const errorMessage = JSON.parse(error.message)?.messageError || 'Erro inesperado.';
+        toast.error(errorMessage);
       }
     }
   };
@@ -145,6 +150,17 @@ const UserProfileEdit = () => {
         backgroundColor: '#f5f5f5',
       }}
     >
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <Navbar />
       <Sidebar />
       <FormContainer elevation={3}>
