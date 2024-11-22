@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'secbank-web/**' # Executa apenas para mudanças na pasta secbank-web
   workflow_dispatch:
 
 jobs:
@@ -36,15 +38,15 @@ jobs:
             -Dsonar.organization=vini404
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.branch.name=${{ github.ref_name }}
-            -Dsonar.sources=src # Pasta de fontes a ser analisada
-            -Dsonar.coverage.exclusions=**/*.test.js,**/__mocks__/** # Exclui testes e mocks
+            -Dsonar.sources=src
+            -Dsonar.coverage.exclusions=**/*.test.js,**/__mocks__/**
             -X
 
       # Step 4: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # Substitua pela versão necessária
+          node-version: '18'
 
       # Step 5: Install Dependencies
       - name: Install Dependencies

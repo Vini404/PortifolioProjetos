@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'secbank.api/**' # Executa apenas para mudanças na pasta secbank.api
   workflow_dispatch:
 
 jobs:
