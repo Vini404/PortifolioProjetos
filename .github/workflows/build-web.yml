@@ -54,7 +54,8 @@ jobs:
       # Step 6: Build Project
       - name: Build Project
         working-directory: ./secbank-web
-        run: npm run build
+        run: |
+          CI=false npm run build
 
       # Step 7: Deploy to S3
       - name: Deploy to S3
