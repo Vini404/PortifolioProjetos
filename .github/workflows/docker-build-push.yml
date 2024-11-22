@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       # Step 1: Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -25,7 +24,24 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 3: Run SonarCloud Analysis using SonarQube Action
+      # Step 3: Set up Go
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.20 # Substitua pela versão necessária
+
+      # Step 4: Install Dependencies
+      - name: Install Dependencies
+        run: go mod tidy
+
+      # Step 5: Run Tests and Generate Code Coverage
+      - name: Run Tests and Generate Coverage
+        run: |
+          go test ./... -coverprofile=coverage.out
+          go install github.com/t-yuki/gocover-cobertura@latest
+          gocover-cobertura < coverage.out > coverage.xml
+
+      # Step 6: Run SonarCloud Analysis using SonarQube Action
       - name: Run SonarCloud Analysis
         uses: sonarsource/sonarqube-scan-action@v4
         env:
@@ -36,30 +52,31 @@ jobs:
             -Dsonar.projectKey=Vini404_PortifolioProjetos
             -Dsonar.organization=vini404
             -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.go.coverage.reportPaths=coverage.xml
             -Dsonar.branch.name=${{ github.ref_name }}
             -X
 
-      # Step 4: Login to AWS ECR
+      # Step 7: Login to AWS ECR
       - name: Login to AWS ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      # Step 5: Build Docker Image
+      # Step 8: Build Docker Image
       - name: Build Docker Image
         run: |
           docker build -t secbank -f secbank.api/Dockerfile ./secbank.api
 
-      # Step 6: Tag Docker Image
+      # Step 9: Tag Docker Image
       - name: Tag Docker Image
         run: |
           docker tag secbank:latest 400768006621.dkr.ecr.us-east-1.amazonaws.com/secbank:latest
 
-      # Step 7: Push Docker Image to ECR
+      # Step 10: Push Docker Image to ECR
       - name: Push Docker Image to ECR
         run: |
           docker push 400768006621.dkr.ecr.us-east-1.amazonaws.com/secbank:latest
 
-      # Step 8: Force New Deployment on ECS
+      # Step 11: Force New Deployment on ECS
       - name: Force New Deployment on ECS
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
