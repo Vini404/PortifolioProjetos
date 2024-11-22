@@ -32,6 +32,7 @@ jobs:
 
       # Step 5: Run Tests and Generate Code Coverage
       - name: Run Tests and Generate Coverage
+        working-directory: ./secbank.api
         run: |
           go test ./... -coverprofile=coverage.out
           go install github.com/t-yuki/gocover-cobertura@latest
