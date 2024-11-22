@@ -33,6 +33,27 @@ func TestAccountController_List(t *testing.T) {
 	assert.Contains(t, rec.Body.String(), "456")
 }
 
+func TestAccountController_List_2(t *testing.T) {
+	mockService := new(mock_interfaces.MockIAccountService)
+	controller := &controllers.AccountController{IAccountService: mockService}
+
+	expectedAccounts := &[]models.Account{
+		{ID: 1, Number: "123", Digit: "4", IsActive: true},
+		{ID: 2, Number: "456", Digit: "7", IsActive: false},
+	}
+
+	mockService.On("S_List").Return(expectedAccounts, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/accounts", nil)
+	rec := httptest.NewRecorder()
+
+	controller.List(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Contains(t, rec.Body.String(), "123")
+	assert.Contains(t, rec.Body.String(), "456")
+}
+
 func TestAccountController_Get(t *testing.T) {
 	mockService := new(mock_interfaces.MockIAccountService)
 	controller := &controllers.AccountController{IAccountService: mockService}
@@ -53,7 +74,42 @@ func TestAccountController_Get(t *testing.T) {
 
 }
 
+func TestAccountController_Get_2(t *testing.T) {
+	mockService := new(mock_interfaces.MockIAccountService)
+	controller := &controllers.AccountController{IAccountService: mockService}
+
+	expectedAccount := &models.Account{ID: 1, Number: "123", Digit: "4", IsActive: true}
+
+	// Cenário de sucesso
+	mockService.On("S_Get", 1).Return(expectedAccount, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/accounts/1", nil)
+	req = addChiURLParam(req, "id", "1")
+	rec := httptest.NewRecorder()
+
+	controller.Get(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Contains(t, rec.Body.String(), "123")
+
+}
+
 func TestAccountController_Delete(t *testing.T) {
+	mockService := new(mock_interfaces.MockIAccountService)
+	controller := &controllers.AccountController{IAccountService: mockService}
+
+	// Cenário de sucesso
+	mockService.On("S_Delete", 1).Return(nil)
+
+	req := httptest.NewRequest(http.MethodDelete, "/accounts/1", nil)
+	req = addChiURLParam(req, "id", "1")
+	rec := httptest.NewRecorder()
+
+	controller.Delete(rec, req)
+	assert.Equal(t, http.StatusOK, rec.Code)
+}
+
+func TestAccountController_Delete_2(t *testing.T) {
 	mockService := new(mock_interfaces.MockIAccountService)
 	controller := &controllers.AccountController{IAccountService: mockService}
 
