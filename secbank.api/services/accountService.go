@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	dto "secbank.api/dto/account"
 	"secbank.api/interfaces/repository"
 	"secbank.api/models"
@@ -30,7 +29,7 @@ func (service *AccountService) S_Update(account models.Account) error {
 	err := service.IAccountRepository.R_Update(account)
 
 	if err != nil {
-		fmt.Println(err.Error())
+		return err
 	}
 	return nil
 }
@@ -39,7 +38,7 @@ func (service *AccountService) S_Delete(id int) error {
 	err := service.IAccountRepository.R_Delete(id)
 
 	if err != nil {
-		fmt.Println(err.Error())
+		return err
 	}
 	return nil
 }

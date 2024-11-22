@@ -5,12 +5,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/rekognition"
+	"github.com/aws/aws-sdk-go/service/rekognition/rekognitioniface"
 	"github.com/google/uuid"
 	"strconv"
 )
 
+// RekognitionService agora aceita a interface RekognitionAPI
 type RekognitionService struct {
-	Client *rekognition.Rekognition
+	Client rekognitioniface.RekognitionAPI
 }
 
 // Função para inicializar o RekognitionService
@@ -89,6 +91,7 @@ func (r *RekognitionService) SearchUsersByImage(collectionID string, imageBytes 
 	return response, nil
 }
 
+// Método para obter os IDs das faces indexadas
 func (r *RekognitionService) GetFacesIDs(responseToIndexFace *rekognition.IndexFacesOutput) []string {
 	var faceIDs []string
 
