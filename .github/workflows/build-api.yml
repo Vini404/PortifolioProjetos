@@ -57,7 +57,7 @@ jobs:
             -Dsonar.go.coverage.reportPaths=coverage.out
             -Dsonar.branch.name=${{ github.ref_name }}
             -Dsonar.coverage.exclusions=**/*_test.go,**/mocks/**,**/dto/**,**/utils/**
-            -Dsonar.sources=service
+            -Dsonar.sources=services
             -X
 
       # Step 7: Login to AWS ECR
