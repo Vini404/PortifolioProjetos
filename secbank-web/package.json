@@ -1,7 +1,13 @@
 {
   "name": "secbank-web",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
+  "jest": {
+    "transform": {
+      "^.+\\.[t|j]sx?$": "babel-jest"
+    }
+  },
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
@@ -19,7 +25,6 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0",
-    "react-scripts": "5.0.1",
     "react-toastify": "^10.0.6",
     "react-webcam": "^7.2.0",
     "recharts": "^2.13.0",
@@ -48,5 +53,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "jest": "^27.5.1",
+    "jest-watch-typeahead": "^0.6.5",
+    "react-scripts": "^5.0.1"
   }
 }
