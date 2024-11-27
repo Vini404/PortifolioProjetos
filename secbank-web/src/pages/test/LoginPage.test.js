@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import api from '../../api/axiosBase';
 import LoginPage from '../LoginPage';
 
+// Mock API
 jest.mock('../../api/axiosBase', () => ({
   post: jest.fn(),
 }));
@@ -15,6 +16,24 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
 }));
+
+// Suppress React warnings
+beforeEach(() => {
+  jest.spyOn(console, 'error').mockImplementation((message) => {
+    if (
+      message.includes('ReactDOMTestUtils.act is deprecated') ||
+      message.includes('not wrapped in act(...)')
+    ) {
+      return; // Ignore specific warnings
+    }
+  });
+
+  jest.spyOn(console, 'warn').mockImplementation(() => {}); // Ignore warnings
+});
+
+afterEach(() => {
+  jest.restoreAllMocks(); // Restore original implementations
+});
 
 // Mock localStorage
 beforeEach(() => {
@@ -36,9 +55,7 @@ beforeEach(() => {
   });
 });
 
-const renderWithRouter = (ui) => {
-  return render(<MemoryRouter>{ui}</MemoryRouter>);
-};
+const renderWithRouter = (ui) => render(<MemoryRouter>{ui}</MemoryRouter>);
 
 describe('LoginPage Component', () => {
   beforeEach(() => {
