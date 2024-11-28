@@ -63,7 +63,7 @@ func (service *CustomerService) S_Create(customer models.Customer, file multipar
 
 	balance := models.Balance{
 		IDAccount:        accountID,
-		Amount:           0,
+		Amount:           200,
 		AmountBlocked:    0,
 		UpdatedTimeStamp: time.Now(),
 	}
