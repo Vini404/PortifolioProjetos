@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an Axios instance with a centralized base URL
 const api = axios.create({
-  baseURL: 'https://secbank-lb-1516101896.us-east-1.elb.amazonaws.com', // replace with your API base URL
+  baseURL: 'https://secbank.vinilab.dev', // replace with your API base URL
   headers: {
     'Content-Type': 'application/json', // default headers (optional)
     // Add any other headers you need, e.g., Authorization
