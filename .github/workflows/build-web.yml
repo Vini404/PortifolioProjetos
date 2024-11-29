@@ -1,4 +1,4 @@
-name: Build, Deploy Web Project, and Invalidate Cache
+name: Build, Test, Deploy Web Project, and Run Sonar Analysis
 
 on:
   push:
@@ -41,7 +41,8 @@ jobs:
       - name: Run Tests and Generate Coverage
         working-directory: ./secbank-web
         run: |
-          npm run test --
+          npm run test -- --coverage --coverageReporters=text-summary --coverageReporters=lcov
+          mv coverage/lcov-report/* coverage/coverage.out
         env:
           CI: true
 
@@ -58,7 +59,7 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.branch.name=${{ github.ref_name }}
             -Dsonar.sources=src/pages
-            -Dsonar.coverageReportPaths=coverage/clover.xml
+            -Dsonar.coverageReportPaths=coverage/coverage.out
             -Dsonar.coverage.exclusions=**/*.test.js,**/__mocks__/**
             -X
 
