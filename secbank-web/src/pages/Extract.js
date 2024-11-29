@@ -68,8 +68,14 @@ const Extract = () => {
 
         toast.success('Dados carregados com sucesso!');
       } catch (error) {
-        const errorMessage = JSON.parse(error.message).messageError;
-        toast.error(errorMessage || 'Erro inesperado');
+        let errorMessage = 'Erro inesperado';
+        try {
+          const parsedError = JSON.parse(error.message);
+          errorMessage = parsedError.messageError || errorMessage;
+        } catch (parseError) {
+          // Mantém o erro genérico
+        }
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }

@@ -52,7 +52,7 @@ const Sidebar = () => {
       <List sx={{ padding: '0 20px' }}>
         {menuItems.map((item) => (
           <ListItemStyled
-            button
+            button="true"
             key={item.text}
             onClick={() => {
               setSelectedItem(item.text);

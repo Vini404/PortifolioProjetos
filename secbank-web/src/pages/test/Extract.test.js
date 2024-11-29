@@ -5,10 +5,12 @@ import { ToastContainer } from 'react-toastify';
 import Extract from '../Extract';
 import api from '../../api/axiosBase';
 
+// Mock da API
 jest.mock('../../api/axiosBase', () => ({
   get: jest.fn(),
 }));
 
+// Função auxiliar para renderizar com roteamento
 const renderWithRouter = (ui) => {
   return render(
     <MemoryRouter>
@@ -17,17 +19,27 @@ const renderWithRouter = (ui) => {
   );
 };
 
+// Variáveis para capturar avisos
+let consoleWarnSpy;
+let consoleErrorSpy;
+
 describe('Extract Component', () => {
   beforeEach(() => {
+    // Ignorar warnings e erros
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     jest.clearAllMocks();
     localStorage.setItem('token', 'mock-token');
   });
 
   afterEach(() => {
+    // Restaurar métodos console
+    consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
     jest.restoreAllMocks();
   });
 
-  test('renders loading state initially', () => {
+  test('renders loading state initially', async () => {
     renderWithRouter(
       <>
         <Extract />
@@ -39,7 +51,7 @@ describe('Extract Component', () => {
   });
 
   test('handles token not found error', async () => {
-    localStorage.removeItem('token'); // Simulate missing token
+    localStorage.removeItem('token'); // Simula token ausente
 
     renderWithRouter(
       <>
@@ -55,7 +67,7 @@ describe('Extract Component', () => {
 
   test('handles user info API error', async () => {
     api.get.mockResolvedValueOnce({
-      ok: false, // `/customer/info` failure
+      ok: false, // Simula falha no `/customer/info`
     });
 
     renderWithRouter(
@@ -74,10 +86,10 @@ describe('Extract Component', () => {
     api.get
       .mockResolvedValueOnce({
         ok: true,
-        result: { data: { ID: 123 } }, // `/customer/info` success
+        result: { data: { ID: 123 } }, // Simula sucesso no `/customer/info`
       })
       .mockResolvedValueOnce({
-        ok: false, // `/balance/extract/:id` failure
+        ok: false, // Simula falha no `/balance/extract/:id`
       });
 
     renderWithRouter(

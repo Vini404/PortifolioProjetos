@@ -10,29 +10,28 @@ jest.mock('../../api/axiosBase', () => ({
   post: jest.fn(),
 }));
 
-// Mock useNavigate globally
+// Mock useNavigate globalmente
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
 }));
 
-// Suppress React warnings
+// Suprimir avisos e erros no console
 beforeEach(() => {
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation((message) => {
     if (
       message.includes('ReactDOMTestUtils.act is deprecated') ||
       message.includes('not wrapped in act(...)')
     ) {
-      return; // Ignore specific warnings
+      return; // Ignorar avisos específicos
     }
   });
-
-  jest.spyOn(console, 'warn').mockImplementation(() => {}); // Ignore warnings
 });
 
 afterEach(() => {
-  jest.restoreAllMocks(); // Restore original implementations
+  jest.restoreAllMocks(); // Restaurar o comportamento original dos métodos
 });
 
 // Mock localStorage
@@ -55,6 +54,7 @@ beforeEach(() => {
   });
 });
 
+// Função auxiliar para renderizar com roteamento
 const renderWithRouter = (ui) => render(<MemoryRouter>{ui}</MemoryRouter>);
 
 describe('LoginPage Component', () => {
@@ -78,7 +78,7 @@ describe('LoginPage Component', () => {
   });
 
   test('displays loading spinner when login is in progress', async () => {
-    api.post.mockImplementationOnce(() => new Promise(() => {})); // Simulate a pending request
+    api.post.mockImplementationOnce(() => new Promise(() => {})); // Simular requisição pendente
 
     renderWithRouter(<LoginPage />);
 
