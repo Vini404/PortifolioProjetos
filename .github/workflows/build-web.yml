@@ -38,11 +38,10 @@ jobs:
         run: npm install
 
       # Step 5: Run Tests and Generate Coverage
-      - name: Run Tests and Generate Coverage
+      - name: Run Tests and Generate lcov Coverage
         working-directory: ./secbank-web
         run: |
-          npm run test -- --coverage --coverageReporters=clover
-          mv coverage/clover.xml coverage.out
+          npm run test -- --coverage --coverageReporters=lcov
         env:
           CI: true
 
@@ -59,7 +58,7 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.branch.name=${{ github.ref_name }}
             -Dsonar.sources=src/pages
-            -Dsonar.coverageReportPaths=coverage.out
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.coverage.exclusions=**/*.test.js,**/__mocks__/**
             -X
 
