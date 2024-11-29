@@ -10,7 +10,7 @@ on:
 
 jobs:
   build-deploy-web:
-    name: Build and Deploy Web Project
+    name: Build, Test, Deploy Web Project, and Run Sonar Analysis
     runs-on: ubuntu-latest
 
     steps:
@@ -26,7 +26,26 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Step 3: Run SonarCloud Analysis
+      # Step 3: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      # Step 4: Install Dependencies
+      - name: Install Dependencies
+        working-directory: ./secbank-web
+        run: npm install
+
+      # Step 5: Run Tests and Generate Coverage
+      - name: Run Tests and Generate Coverage
+        working-directory: ./secbank-web
+        run: |
+          npm run test --
+        env:
+          CI: true
+
+      # Step 6: Run SonarCloud Analysis
       - name: Run SonarCloud Analysis
         uses: sonarsource/sonarqube-scan-action@v4
         env:
@@ -38,35 +57,25 @@ jobs:
             -Dsonar.organization=vini404
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.branch.name=${{ github.ref_name }}
-            -Dsonar.sources=src
+            -Dsonar.sources=src/pages
+            -Dsonar.coverageReportPaths=coverage/clover.xml
             -Dsonar.coverage.exclusions=**/*.test.js,**/__mocks__/**
             -X
 
-      # Step 4: Set up Node.js
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      # Step 5: Install Dependencies
-      - name: Install Dependencies
-        working-directory: ./secbank-web
-        run: npm install
-
-      # Step 6: Build Project
+      # Step 7: Build Project
       - name: Build Project
         working-directory: ./secbank-web
         run: |
           CI=false npm run build
 
-      # Step 7: Deploy to S3
+      # Step 8: Deploy to S3
       - name: Deploy to S3
         run: |
           aws s3 sync ./secbank-web/build s3://secbank.vinilab.dev \
             --delete \
             --acl public-read
 
-      # Step 8: Invalidate CloudFront Cache
+      # Step 9: Invalidate CloudFront Cache
       - name: Invalidate CloudFront Cache
         run: |
           aws cloudfront create-invalidation \
