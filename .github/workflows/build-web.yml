@@ -41,8 +41,8 @@ jobs:
       - name: Run Tests and Generate Coverage
         working-directory: ./secbank-web
         run: |
-          npm run test -- --coverage --coverageReporters=text-summary --coverageReporters=lcov
-          mv coverage/lcov-report/* coverage/coverage.out
+          npm run test -- --coverage --coverageReporters=clover
+          mv coverage/clover.xml coverage.out
         env:
           CI: true
 
@@ -59,7 +59,7 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.branch.name=${{ github.ref_name }}
             -Dsonar.sources=src/pages
-            -Dsonar.coverageReportPaths=coverage/coverage.out
+            -Dsonar.coverageReportPaths=coverage.out
             -Dsonar.coverage.exclusions=**/*.test.js,**/__mocks__/**
             -X
 
