@@ -24,6 +24,13 @@ func (repository *CustomerRepository) R_List() (*[]models.Customer, error) {
 
 func (repository *CustomerRepository) R_Create(customer models.Customer) (int, error) {
 	customer.CreatedTimeStamp = time.Now()
+
+	err := customer.Validate()
+
+	if err != nil {
+		return 0, err
+	}
+
 	id, err := repository.Insert(customer, "customer")
 	if err != nil {
 		return 0, err

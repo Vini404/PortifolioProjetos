@@ -28,6 +28,7 @@ func (service *CustomerService) S_List() (*[]models.Customer, error) {
 }
 
 func (service *CustomerService) S_Create(customer models.Customer, file multipart.File) error {
+
 	id, err := service.ICustomerRepository.R_Create(customer)
 
 	if err != nil {
@@ -141,19 +142,21 @@ func (service *CustomerService) S_Get(id int) (*models.Customer, error) {
 }
 
 func (service *CustomerService) S_Auth(request dto.AuthRequest) (*dto.AuthResponse, error) {
+	request.Validate()
+
 	customer, err := service.ICustomerRepository.R_Get_By_Email(request.Email)
 
 	if err != nil {
 
 		if err.Error() != "sql: no rows in result set" {
-			return nil, fmt.Errorf("O email ou senha informada estão incorretas")
+			return nil, fmt.Errorf("Usuario ou senha incorreta.")
 		}
 
 		return nil, err
 	}
 
 	if customer == nil {
-		return nil, errors.New("Usuario não encontrado")
+		return nil, errors.New("Usuario ou senha incorreta.")
 	}
 
 	if customer.Password != request.Password {

@@ -45,7 +45,7 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     setLoading(true);
-
+    debugger
     try {
       const response = await api.post('/login', JSON.stringify({ email, password }));
       const result = response.result;

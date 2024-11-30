@@ -4,6 +4,7 @@ import { styled } from '@mui/system';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Webcam from 'react-webcam';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosBase';
 
 const Background = styled(Box)({
@@ -51,8 +52,8 @@ const RegisterPage = () => {
   const [photo, setPhoto] = useState(null);
 
   const webcamRef = useRef(null);
+  const navigate = useNavigate();
 
-  // Captura a imagem da webcam e converte para Blob
   const handleCapture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
     fetch(imageSrc)
@@ -64,7 +65,7 @@ const RegisterPage = () => {
   }, [webcamRef]);
 
   const handleRetake = () => {
-    setPhoto(null); // Permite ao usuário tentar capturar uma nova foto
+    setPhoto(null);
   };
 
   const handleNextStep = () => {
@@ -73,7 +74,35 @@ const RegisterPage = () => {
       toast.error('As senhas não coincidem!');
       return;
     }
-    setActiveStep(1); // Avança para a etapa de captura de foto
+    setActiveStep(1);
+  };
+
+  const handleLogin = async () => {
+    try {
+      const response = await api.post(
+        '/login',
+        JSON.stringify({ email, password }),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const result = response.data;
+
+      if (response.ok) {
+        localStorage.clear();
+        localStorage.setItem('token', result.token);
+        toast.success('Login realizado com sucesso!');
+        navigate('/home');
+      } else {
+        toast.error('Erro ao realizar login. Verifique suas credenciais.');
+      }
+    } catch (error) {
+      const errorMessage = JSON.parse(error.message).messageError || 'Erro ao realizar login';
+      toast.error(errorMessage);
+    }
   };
 
   const handleRegister = async () => {
@@ -84,7 +113,7 @@ const RegisterPage = () => {
     formData.append('Birthday', new Date(birthday).toISOString());
     formData.append('Password', password);
     formData.append('Document', document);
-    formData.append('file', photo); // Adiciona a foto capturada ao FormData
+    formData.append('file', photo);
 
     try {
       const response = await api.post('/customer', formData, {
@@ -94,6 +123,7 @@ const RegisterPage = () => {
       });
       if (response.ok) {
         toast.success('Usuário registrado com sucesso!');
+        await handleLogin(); // Autenticação automática
       } else {
         toast.error('Erro ao registrar o usuário.');
       }
@@ -121,7 +151,6 @@ const RegisterPage = () => {
           Registrar
         </Typography>
         {activeStep === 0 ? (
-          // Etapa 1: Formulário de Registro
           <>
             <TextField
               label="Nome Completo"
@@ -221,7 +250,6 @@ const RegisterPage = () => {
             </StyledButton>
           </>
         ) : (
-          // Etapa 2: Captura de Foto
           <>
             <Typography variant="h6" gutterBottom>
               Verificação de Identidade

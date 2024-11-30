@@ -1,18 +1,24 @@
 import axios from 'axios';
 
-// Create an Axios instance with a centralized base URL
+const baseURL = process.env.REACT_APP_API_BASE_URL
+
+console.log(process.env.NODE_ENV)
+
 const api = axios.create({
-  baseURL: 'https://api.vinilab.dev', // replace with your API base URL
+  baseURL: baseURL, 
   headers: {
     'Content-Type': 'application/json', // default headers (optional)
-    // Add any other headers you need, e.g., Authorization
   },
 });
 
 // Optional: Set up interceptors for request or response if needed
 api.interceptors.request.use(
   config => {
-    config.headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`
+    // Add Authorization token if it exists
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
     return config;
   },
   error => Promise.reject(error)
@@ -20,13 +26,17 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   response => {
-    return {ok:true, result:response.data }
+    return { ok: true, result: response.data };
   },
   error => {
-    if(error.status === 400)
-        return Promise.reject(new Error( JSON.stringify({ok:false,messageError:error.response.data.messageError})));
-
-    else return Promise.reject(error)
+    if (error.response?.status === 400) {
+      return Promise.reject(
+        new Error(
+          JSON.stringify({ ok: false, messageError: error.response.data.messageError })
+        )
+      );
+    }
+    return Promise.reject(error);
   }
 );
 
