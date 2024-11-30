@@ -170,6 +170,7 @@ func TestCustomerService_S_Create(t *testing.T) {
 	mockBalanceRepo := &MockBalanceRepository{}
 
 	// Configuração dos mocks
+	mockCustomerRepo.On("R_Get_By_Email", "test@example.com").Return(nil, nil) // Simulating no user exists
 	mockCustomerRepo.On("R_Create", mock.Anything).Return(1, nil)
 	mockAccountHolderRepo.On("R_Create", mock.Anything).Return(1, nil)
 	mockAccountRepo.On("R_Create", mock.Anything).Return(1, nil)
@@ -191,7 +192,6 @@ func TestCustomerService_S_Create(t *testing.T) {
 	}
 
 	service.S_Create(customer, file)
-
 }
 
 // Teste para S_Auth com sucesso
