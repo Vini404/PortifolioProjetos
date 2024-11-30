@@ -2,7 +2,6 @@ import React from 'react';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
 
 import RegisterPage from './pages/RegisterPage';
 
@@ -33,7 +32,6 @@ const App = () => {
     <Router>
     <Routes>
       <Route path="/" element={<LoginPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/transfer" element={<TransferPage />} />
       <Route path="/user/edit" element={<UserProfileEdit/>} />
