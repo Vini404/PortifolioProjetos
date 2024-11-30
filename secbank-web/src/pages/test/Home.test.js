@@ -19,24 +19,20 @@ const renderWithRouter = (ui) => {
   );
 };
 
-// Variáveis para capturar avisos
-let consoleWarnSpy;
-let consoleErrorSpy;
-
 describe('Home Component', () => {
+  let consoleErrorSpy;
+
   beforeEach(() => {
-    // Ignorar warnings e erros
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     jest.clearAllMocks();
     localStorage.setItem('token', 'mock-token');
+
+    // Ignorar mensagens de erro no console
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    // Restaurar métodos console
-    consoleWarnSpy.mockRestore();
-    consoleErrorSpy.mockRestore();
     jest.restoreAllMocks();
+    consoleErrorSpy.mockRestore();
   });
 
   test('renders loading state initially', async () => {

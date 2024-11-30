@@ -19,11 +19,10 @@ const renderWithRouter = (ui) => {
   );
 };
 
-// Variáveis para capturar avisos
-let consoleWarnSpy;
-let consoleErrorSpy;
-
 describe('Extract Component', () => {
+  let consoleWarnSpy;
+  let consoleErrorSpy;
+
   beforeEach(() => {
     // Ignorar warnings e erros
     consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});

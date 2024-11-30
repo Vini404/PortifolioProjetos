@@ -17,21 +17,14 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
-// Suprimir avisos e erros no console
+// Ignorar warnings e erros no console
 beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation((message) => {
-    if (
-      message.includes('ReactDOMTestUtils.act is deprecated') ||
-      message.includes('not wrapped in act(...)')
-    ) {
-      return; // Ignorar avisos específicos
-    }
-  });
+  jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 afterEach(() => {
-  jest.restoreAllMocks(); // Restaurar o comportamento original dos métodos
+  jest.restoreAllMocks();
 });
 
 // Mock localStorage
@@ -139,7 +132,9 @@ describe('LoginPage Component', () => {
         '/login',
         JSON.stringify({ email: 'test@example.com', password: 'wrongpassword' })
       );
-      expect(screen.getByText(/Erro ao realizar login. Verifique suas credenciais./i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Erro ao realizar login. Verifique suas credenciais./i)
+      ).toBeInTheDocument();
     });
   });
 
