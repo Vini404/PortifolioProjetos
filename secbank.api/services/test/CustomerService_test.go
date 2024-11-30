@@ -170,13 +170,12 @@ func TestCustomerService_S_Create(t *testing.T) {
 	mockBalanceRepo := &MockBalanceRepository{}
 
 	// Configuração dos mocks
-	mockCustomerRepo.On("R_Get_By_Email", "test@example.com").Return(nil, nil) // Simulating no user exists
+	mockCustomerRepo.On("R_Get_By_Email", "test@example.com").Return((*models.Customer)(nil), nil) // No existing user
 	mockCustomerRepo.On("R_Create", mock.Anything).Return(1, nil)
 	mockAccountHolderRepo.On("R_Create", mock.Anything).Return(1, nil)
 	mockAccountRepo.On("R_Create", mock.Anything).Return(1, nil)
 	mockBalanceRepo.On("R_Create", mock.Anything).Return(1, nil)
 
-	// Substituir o RekognitionService real pelo mock
 	service := services.CustomerService{
 		ICustomerRepository:      mockCustomerRepo,
 		IAccountHolderRepository: mockAccountHolderRepo,
