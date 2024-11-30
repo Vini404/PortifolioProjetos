@@ -8,7 +8,6 @@ import RegisterPage from './pages/RegisterPage';
 
 import TransferPage from './pages/TransferPage';
 import PasswordRecoveryPage from './pages/PasswordRecoveryPage';
-import AccountMannager from './pages/AccountManager';
 import UserProfileEdit from './pages/UserProfileEdit';
 import Extract from './pages/Extract';
 import Home from './pages/Home';
@@ -37,8 +36,6 @@ const App = () => {
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/transfer" element={<TransferPage />} />
-      <Route path="/passwordRecovery" element={<PasswordRecoveryPage />} />
-      <Route path="/account" element={<AccountMannager/>} />
       <Route path="/user/edit" element={<UserProfileEdit/>} />
       <Route path="/extract" element={<Extract/>} />
       <Route path="/home" element={<Home/>} />

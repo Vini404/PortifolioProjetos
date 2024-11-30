@@ -73,7 +73,6 @@ describe('LoginPage Component', () => {
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Senha/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Entrar/i })).toBeInTheDocument();
-    expect(screen.getByText(/Esqueceu sua senha\?/i)).toBeInTheDocument();
     expect(screen.getByText(/Não tem uma conta\? Registre-se/i)).toBeInTheDocument();
   });
 
@@ -161,13 +160,6 @@ describe('LoginPage Component', () => {
     await waitFor(() => {
       expect(screen.getByText(/Server error/i)).toBeInTheDocument();
     });
-  });
-
-  test('navigates to forgot password page', () => {
-    renderWithRouter(<LoginPage />);
-
-    fireEvent.click(screen.getByText(/Esqueceu sua senha\?/i));
-    expect(mockNavigate).toHaveBeenCalledWith('/passwordRecovery');
   });
 
   test('navigates to register page', () => {

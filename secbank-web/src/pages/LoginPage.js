@@ -66,10 +66,6 @@ const LoginPage = () => {
     }
   };
 
-  const handleForgotPassword = () => {
-    navigate('/passwordRecovery');
-  };
-
   const handleRegister = () => {
     navigate('/register');
   };
@@ -121,13 +117,6 @@ const LoginPage = () => {
             Entrar
           </StyledButton>
         )}
-        <Typography
-          variant="body2"
-          sx={{ mt: 2, color: '#888', cursor: 'pointer' }}
-          onClick={handleForgotPassword}
-        >
-          Esqueceu sua senha?
-        </Typography>
         <Typography
           variant="body2"
           sx={{ mt: 2, color: '#888', cursor: 'pointer' }}
