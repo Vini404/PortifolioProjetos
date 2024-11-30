@@ -28,6 +28,17 @@ func (service *CustomerService) S_List() (*[]models.Customer, error) {
 }
 
 func (service *CustomerService) S_Create(customer models.Customer, file multipart.File) error {
+	alreadyExistcustomer, errGetAlreadyExistCustomer := service.ICustomerRepository.R_Get_By_Email(customer.Email)
+
+	if errGetAlreadyExistCustomer != nil {
+		if errGetAlreadyExistCustomer.Error() != "sql: no rows in result set" {
+			return errGetAlreadyExistCustomer
+		}
+	}
+
+	if alreadyExistcustomer != nil {
+		return errors.New("Já existe um usuario com o email informado")
+	}
 
 	id, err := service.ICustomerRepository.R_Create(customer)
 
@@ -148,7 +159,7 @@ func (service *CustomerService) S_Auth(request dto.AuthRequest) (*dto.AuthRespon
 
 	if err != nil {
 
-		if err.Error() != "sql: no rows in result set" {
+		if err.Error() == "sql: no rows in result set" {
 			return nil, fmt.Errorf("Usuario ou senha incorreta.")
 		}
 

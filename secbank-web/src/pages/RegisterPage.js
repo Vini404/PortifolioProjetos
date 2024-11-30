@@ -69,43 +69,38 @@ const RegisterPage = () => {
   };
 
   const handleNextStep = () => {
+    if (
+      !fullName.trim() ||
+      !phone.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !confirmPassword.trim() ||
+      !birthday.trim() ||
+      !document.trim()
+    ) {
+      toast.error('Todos os campos são obrigatórios!');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setPasswordError(true);
       toast.error('As senhas não coincidem!');
       return;
     }
+
     setActiveStep(1);
   };
 
-  const handleLogin = async () => {
-    try {
-      const response = await api.post(
-        '/login',
-        JSON.stringify({ email, password }),
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      const result = response.data;
-
-      if (response.ok) {
-        localStorage.clear();
-        localStorage.setItem('token', result.token);
-        toast.success('Login realizado com sucesso!');
-        navigate('/home');
-      } else {
-        toast.error('Erro ao realizar login. Verifique suas credenciais.');
-      }
-    } catch (error) {
-      const errorMessage = JSON.parse(error.message).messageError || 'Erro ao realizar login';
-      toast.error(errorMessage);
-    }
+  const handleBackStep = () => {
+    setActiveStep(0);
   };
 
   const handleRegister = async () => {
+    if (!photo) {
+      toast.error('Por favor, capture uma foto!');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('FullName', fullName);
     formData.append('Phone', phone);
@@ -123,12 +118,42 @@ const RegisterPage = () => {
       });
       if (response.ok) {
         toast.success('Usuário registrado com sucesso!');
-        await handleLogin(); // Autenticação automática
+        await handleLogin();
       } else {
         toast.error('Erro ao registrar o usuário.');
       }
     } catch (error) {
-      const errorMessage = JSON.parse(error.message).messageError || 'Erro inesperado.';
+      console.log(error);
+      const errorMessage =
+        JSON.parse(error.message).messageError || 'Erro inesperado.';
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleLogin = async () => {
+    try {
+      const response = await api.post(
+        '/login',
+        JSON.stringify({ email, password }),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const result = response.result.data;
+
+      if (response.ok) {
+        localStorage.clear();
+        localStorage.setItem('token', result.token);
+        toast.success('Login realizado com sucesso!');
+        navigate('/home');
+      } else {
+        toast.error('Erro ao realizar login. Verifique suas credenciais.');
+      }
+    } catch (error) {
+      const errorMessage = JSON.parse(error.message).messageError || 'Erro ao realizar login';
       toast.error(errorMessage);
     }
   };
@@ -262,20 +287,50 @@ const RegisterPage = () => {
                   screenshotFormat="image/jpeg"
                   width="100%"
                 />
-                <Button variant="contained" color="primary" onClick={handleCapture} sx={{ mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleCapture}
+                  sx={{ mt: 2 }}
+                >
                   Tirar Foto
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  onClick={handleBackStep}
+                  sx={{ mt: 2, ml: 2 }}
+                >
+                  Voltar
                 </Button>
               </Box>
             ) : (
               <Box mt={2} textAlign="center">
                 <Typography>Foto Capturada:</Typography>
-                <img src={URL.createObjectURL(photo)} alt="Foto capturada" style={{ width: '100%', maxWidth: '300px' }} />
+                <img
+                  src={URL.createObjectURL(photo)}
+                  alt="Foto capturada"
+                  style={{ width: '100%', maxWidth: '300px' }}
+                />
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
                   <Button variant="contained" color="secondary" onClick={handleRetake}>
                     Nova Tentativa
                   </Button>
-                  <Button variant="contained" color="primary" onClick={handleRegister} sx={{ ml: 2 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleRegister}
+                    sx={{ ml: 2 }}
+                  >
                     Confirmar Registro
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={handleBackStep}
+                    sx={{ ml: 2 }}
+                  >
+                    Voltar
                   </Button>
                 </Box>
               </Box>
