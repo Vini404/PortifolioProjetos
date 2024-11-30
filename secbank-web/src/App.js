@@ -6,7 +6,6 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
 import TransferPage from './pages/TransferPage';
-import PasswordRecoveryPage from './pages/PasswordRecoveryPage';
 import UserProfileEdit from './pages/UserProfileEdit';
 import Extract from './pages/Extract';
 import Home from './pages/Home';
