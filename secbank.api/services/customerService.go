@@ -3,7 +3,6 @@ package services
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"math/rand"
 	"mime/multipart"
@@ -23,54 +22,98 @@ type CustomerService struct {
 }
 
 func (service *CustomerService) S_List() (*[]models.Customer, error) {
-	allCustomers, err := service.ICustomerRepository.R_List()
-	return allCustomers, err
+	return service.ICustomerRepository.R_List()
 }
 
 func (service *CustomerService) S_Create(customer models.Customer, file multipart.File) error {
-	alreadyExistcustomer, errGetAlreadyExistCustomer := service.ICustomerRepository.R_Get_By_Email(customer.Email)
-
-	if errGetAlreadyExistCustomer != nil {
-		if errGetAlreadyExistCustomer.Error() != "sql: no rows in result set" {
-			return errGetAlreadyExistCustomer
-		}
+	if err := service.checkCustomerExistence(customer.Email); err != nil {
+		return err
 	}
 
-	if alreadyExistcustomer != nil {
-		return errors.New("Já existe um usuario com o email informado")
-	}
-
-	id, err := service.ICustomerRepository.R_Create(customer)
-
+	customerID, err := service.ICustomerRepository.R_Create(customer)
 	if err != nil {
 		return err
 	}
 
+	if err := service.createAccountAndBalance(customerID); err != nil {
+		return err
+	}
+
+	return service.processFacialRecognition(customerID, file)
+}
+
+func (service *CustomerService) S_Update(customer models.Customer) error {
+	existingCustomer, err := service.ICustomerRepository.R_Get(customer.ID)
+	if err != nil {
+		return err
+	}
+
+	existingCustomer.Phone = customer.Phone
+	existingCustomer.Birthday = customer.Birthday
+	existingCustomer.Email = customer.Email
+
+	return service.ICustomerRepository.R_Update(*existingCustomer)
+}
+
+func (service *CustomerService) S_Delete(id int) error {
+	return service.ICustomerRepository.R_Delete(id)
+}
+
+func (service *CustomerService) S_Get(id int) (*models.Customer, error) {
+	return service.ICustomerRepository.R_Get(id)
+}
+
+func (service *CustomerService) S_Auth(request dto.AuthRequest) (*dto.AuthResponse, error) {
+	request.Validate()
+
+	customer, err := service.ICustomerRepository.R_Get_By_Email(request.Email)
+	if err != nil || customer == nil || customer.Password != request.Password {
+		return nil, errors.New("Usuário ou senha incorreta.")
+	}
+
+	token, err := auth.GenerateJWT(customer.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.AuthResponse{Token: token}, nil
+}
+
+// Helper methods for modularization
+func (service *CustomerService) checkCustomerExistence(email string) error {
+	customer, err := service.ICustomerRepository.R_Get_By_Email(email)
+	if err != nil && err.Error() != "sql: no rows in result set" {
+		return err
+	}
+	if customer != nil {
+		return errors.New("Já existe um usuário com o email informado")
+	}
+	return nil
+}
+
+func (service *CustomerService) createAccountAndBalance(customerID int) error {
 	accountHolder := models.AccountHolder{
 		IsActive:         true,
 		CreatedTimeStamp: time.Now(),
-		IDCustomer:       id,
+		IDCustomer:       customerID,
 	}
 
-	idAccountHolder, errAccountHolder := service.IAccountHolderRepository.R_Create(accountHolder)
-
-	if errAccountHolder != nil {
-		return errAccountHolder
+	holderID, err := service.IAccountHolderRepository.R_Create(accountHolder)
+	if err != nil {
+		return err
 	}
 
 	account := models.Account{
-
 		CreatedTimeStamp: time.Now(),
 		IsActive:         true,
-		IDAccountHolder:  idAccountHolder,
+		IDAccountHolder:  holderID,
 		Number:           strconv.Itoa(generate7DigitNumber()),
-		Digit:            strconv.Itoa(idAccountHolder),
+		Digit:            strconv.Itoa(holderID),
 	}
 
-	accountID, errAccount := service.IAccountRepository.R_Create(account)
-
-	if errAccount != nil {
-		return errAccount
+	accountID, err := service.IAccountRepository.R_Create(account)
+	if err != nil {
+		return err
 	}
 
 	balance := models.Balance{
@@ -80,119 +123,39 @@ func (service *CustomerService) S_Create(customer models.Customer, file multipar
 		UpdatedTimeStamp: time.Now(),
 	}
 
-	_, errBalance := service.IBalanceRepository.R_Create(balance)
+	_, err = service.IBalanceRepository.R_Create(balance)
+	return err
+}
 
-	if errBalance != nil {
+func (service *CustomerService) processFacialRecognition(customerID int, file multipart.File) error {
+	rekognitionService := NewRekognitionService("us-east-1")
+	collectionID := "b7cff507-7306-4c37-a461-0ed736b7cdc5"
+
+	if err := rekognitionService.CreateUser(collectionID, customerID); err != nil {
 		return err
 	}
 
-	rekognitionService := NewRekognitionService("us-east-1")
-
-	collectionID := "b7cff507-7306-4c37-a461-0ed736b7cdc5"
-
-	errCreateUserRekognition := rekognitionService.CreateUser(collectionID, id)
-
-	if errCreateUserRekognition != nil {
-		return errCreateUserRekognition
-	}
-
-	imageBytes, errGetImageBytes := getFileBytes(file)
-
-	if errGetImageBytes != nil {
-		return errGetImageBytes
-	}
-
-	indexFaces, errIndexFaces := rekognitionService.IndexFaces(collectionID, imageBytes)
-
-	if errIndexFaces != nil {
-		return errIndexFaces
-	}
-
-	facesIds := rekognitionService.GetFacesIDs(indexFaces)
-
-	errAssociateFacesToUser := rekognitionService.AssociateFacesToUser(collectionID, id, facesIds)
-
-	if errAssociateFacesToUser != nil {
-		return errAssociateFacesToUser
-	}
-
-	return nil
-}
-
-func (service *CustomerService) S_Update(customer models.Customer) error {
-	customerOriginal, _ := service.ICustomerRepository.R_Get(customer.ID)
-
-	customerOriginal.Phone = customer.Phone
-	customerOriginal.Birthday = customer.Birthday
-	customerOriginal.Email = customer.Email
-
-	err := service.ICustomerRepository.R_Update(*customerOriginal)
-
+	imageBytes, err := getFileBytes(file)
 	if err != nil {
-		fmt.Println(err.Error())
+		return err
 	}
-	return nil
-}
 
-func (service *CustomerService) S_Delete(id int) error {
-	err := service.ICustomerRepository.R_Delete(id)
-
+	indexFaces, err := rekognitionService.IndexFaces(collectionID, imageBytes)
 	if err != nil {
-		fmt.Println(err.Error())
-	}
-	return nil
-}
-
-func (service *CustomerService) S_Get(id int) (*models.Customer, error) {
-	customer, err := service.ICustomerRepository.R_Get(id)
-
-	if err != nil {
-		return nil, err
-	}
-	return customer, nil
-}
-
-func (service *CustomerService) S_Auth(request dto.AuthRequest) (*dto.AuthResponse, error) {
-	request.Validate()
-
-	customer, err := service.ICustomerRepository.R_Get_By_Email(request.Email)
-
-	if err != nil {
-
-		if err.Error() == "sql: no rows in result set" {
-			return nil, fmt.Errorf("Usuario ou senha incorreta.")
-		}
-
-		return nil, err
+		return err
 	}
 
-	if customer == nil {
-		return nil, errors.New("Usuario ou senha incorreta.")
-	}
-
-	if customer.Password != request.Password {
-		return nil, errors.New("Usuario ou senha incorreta.")
-	}
-
-	token, err := auth.GenerateJWT(customer.ID)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &dto.AuthResponse{Token: token}, nil
+	faceIDs := rekognitionService.GetFacesIDs(indexFaces)
+	return rekognitionService.AssociateFacesToUser(collectionID, customerID, faceIDs)
 }
 
 func generate7DigitNumber() int {
-	rand.Seed(time.Now().UnixNano())    // Seed the random number generator
-	return rand.Intn(9000000) + 1000000 // Generates a number between 1,000,000 and 9,999,999
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(9000000) + 1000000
 }
 
 func getFileBytes(file multipart.File) ([]byte, error) {
 	var buf bytes.Buffer
 	_, err := io.Copy(&buf, file)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+	return buf.Bytes(), err
 }

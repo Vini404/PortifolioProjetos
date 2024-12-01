@@ -1,7 +1,7 @@
 package services
 
 import (
-	"fmt"
+	"errors"
 	"mime/multipart"
 	dto "secbank.api/dto/transaction"
 	interfaces "secbank.api/interfaces/repository"
@@ -18,101 +18,114 @@ type TransactionService struct {
 }
 
 func (service *TransactionService) Transfer(transferRequest dto.TransferRequest, file multipart.File) error {
-	creditAccount, errCreditAccountInformation := service.IAccountRepository.R_Get_By_Number_And_Digit(transferRequest.NumberCreditAccount, transferRequest.DigitCreditAccount)
+	creditAccount, err := service.getCreditAccount(transferRequest.NumberCreditAccount, transferRequest.DigitCreditAccount)
+	if err != nil {
+		return err
+	}
 
-	if errCreditAccountInformation != nil {
+	debitAccount, err := service.IAccountRepository.R_GetAccountByCustomer(transferRequest.IDCustomerOriginAccount)
+	if err != nil {
+		return err
+	}
 
-		if errCreditAccountInformation.Error() == "sql: no rows in result set" {
-			return fmt.Errorf("A conta informada não existe.")
+	if err := service.validateDebitAccountBalance(debitAccount.ID, transferRequest.Amount); err != nil {
+		return err
+	}
+
+	if err := service.updateAccountBalances(debitAccount.ID, creditAccount.ID, transferRequest.Amount); err != nil {
+		return err
+	}
+
+	if err := service.recordTransaction(debitAccount.ID, creditAccount.ID, transferRequest.Amount); err != nil {
+		return err
+	}
+
+	return service.validateFacialRecognition(file)
+}
+
+// Helper methods
+func (service *TransactionService) getCreditAccount(accountNumber, accountDigit string) (*models.Account, error) {
+	account, err := service.IAccountRepository.R_Get_By_Number_And_Digit(accountNumber, accountDigit)
+	if err != nil {
+		if err.Error() == "sql: no rows in result set" {
+			return nil, errors.New("A conta informada não existe.")
 		}
-
-		return errCreditAccountInformation
+		return nil, err
 	}
-	debitAccount, errDebitAccountInformation := service.IAccountRepository.R_GetAccountByCustomer(transferRequest.IDCustomerOriginAccount)
+	return account, nil
+}
 
-	if errDebitAccountInformation != nil {
-		return errDebitAccountInformation
-	}
-
-	balanceDebitAccount, errGetBalanceDebitAccount := service.IBalanceRepository.R_GetByAccountID(debitAccount.ID)
-
-	if errGetBalanceDebitAccount != nil {
-		return errGetBalanceDebitAccount
+func (service *TransactionService) validateDebitAccountBalance(accountID int, amount float64) error {
+	balance, err := service.IBalanceRepository.R_GetByAccountID(accountID)
+	if err != nil {
+		return err
 	}
 
-	unlockedAmount := balanceDebitAccount.Amount - balanceDebitAccount.AmountBlocked
+	unlockedAmount := balance.Amount - balance.AmountBlocked
+	if unlockedAmount < amount {
+		return errors.New("Você não possui saldo disponível para realizar essa transferência.")
+	}
+	return nil
+}
 
-	if unlockedAmount < transferRequest.Amount {
-		return fmt.Errorf("Você não possui saldo disponivel para realizar essa transferencia")
+func (service *TransactionService) updateAccountBalances(debitAccountID, creditAccountID int, amount float64) error {
+	// Update debit account balance
+	debitBalance, err := service.IBalanceRepository.R_GetByAccountID(debitAccountID)
+	if err != nil {
+		return err
+	}
+	debitBalance.Amount -= amount
+
+	if err := service.IBalanceRepository.R_Update(debitBalance); err != nil {
+		return err
 	}
 
-	balanceCreditAccount, errGetBalanceCreditAccount := service.IBalanceRepository.R_GetByAccountID(creditAccount.ID)
-
-	if errGetBalanceCreditAccount != nil {
-		return errGetBalanceCreditAccount
+	// Update credit account balance
+	creditBalance, err := service.IBalanceRepository.R_GetByAccountID(creditAccountID)
+	if err != nil {
+		return err
 	}
+	creditBalance.Amount += amount
 
-	balanceCreditAccount.Amount += transferRequest.Amount
-	balanceDebitAccount.Amount -= transferRequest.Amount
+	return service.IBalanceRepository.R_Update(creditBalance)
+}
 
-	errUpdateBalanceCreditAccount := service.IBalanceRepository.R_Update(balanceCreditAccount)
-
-	if errUpdateBalanceCreditAccount != nil {
-		return errUpdateBalanceCreditAccount
-	}
-
-	errUpdateBalanceDebitAccount := service.IBalanceRepository.R_Update(balanceDebitAccount)
-
-	if errUpdateBalanceDebitAccount != nil {
-		return errUpdateBalanceDebitAccount
-	}
-
+func (service *TransactionService) recordTransaction(debitAccountID, creditAccountID int, amount float64) error {
 	transaction := models.Transaction{
 		CreatedTimeStamp: time.Now(),
-		IDCreditAccount:  creditAccount.ID,
-		IDDebitAccount:   debitAccount.ID,
-		Amount:           transferRequest.Amount,
-		Description:      "Transferencia entre contas",
+		IDCreditAccount:  creditAccountID,
+		IDDebitAccount:   debitAccountID,
+		Amount:           amount,
+		Description:      "Transferência entre contas",
 		TransactionType:  1,
 	}
 
-	_, errInsertBalance := service.ITransactionRepository.R_Create(transaction)
+	_, err := service.ITransactionRepository.R_Create(transaction)
+	return err
+}
 
-	if errInsertBalance != nil {
-		return errInsertBalance
-	}
-
-	imageBytes, errGetImageBytes := getFileBytes(file)
-
-	if errGetImageBytes != nil {
-		return errGetImageBytes
+func (service *TransactionService) validateFacialRecognition(file multipart.File) error {
+	imageBytes, err := getFileBytes(file)
+	if err != nil {
+		return err
 	}
 
 	collectionID := "b7cff507-7306-4c37-a461-0ed736b7cdc5"
-
 	rekognitionService := NewRekognitionService("us-east-1")
 
-	users, errorSearchUsers := rekognitionService.SearchUsersByImage(collectionID, imageBytes)
-
-	if errorSearchUsers != nil {
-		return errorSearchUsers
+	users, err := rekognitionService.SearchUsersByImage(collectionID, imageBytes)
+	if err != nil || len(users.UserMatches) == 0 {
+		return errors.New("Falha na validação de reconhecimento facial.")
 	}
 
-	if len(users.UserMatches) > 0 {
-		userID, errParseUserID := strconv.Atoi(*users.UserMatches[0].User.UserId)
+	userID, err := strconv.Atoi(*users.UserMatches[0].User.UserId)
+	if err != nil {
+		return err
+	}
 
-		if errParseUserID != nil {
-			return errParseUserID
-		}
-
-		_, err := service.ICustomerRepository.R_Get(userID)
-
-		if err != nil {
-			return fmt.Errorf("Falha na validação de reconhecimento facial.")
-		}
-
-	} else {
-		return fmt.Errorf("Falha na validação de reconhecimento facial.")
+	_, err = service.ICustomerRepository.R_Get(userID)
+	if err != nil {
+		return errors.New("Falha na validação de reconhecimento facial.")
 	}
 
 	return nil
