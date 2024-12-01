@@ -246,6 +246,31 @@ func TestCustomerService_S_Auth_InvalidPassword(t *testing.T) {
 	mockCustomerRepo.AssertExpectations(t)
 }
 
+func TestCustomerService_S_Auth_InvalidPassword_2(t *testing.T) {
+	mockCustomerRepo := &MockCustomerRepository{}
+
+	mockCustomerRepo.On("R_Get_By_Email", "vinicius@teste").Return(&models.Customer{
+		ID:       2,
+		Email:    "vinicius@teste",
+		Password: "senhaErrada",
+	}, nil)
+
+	service := services.CustomerService{
+		ICustomerRepository: mockCustomerRepo,
+	}
+
+	request := dto2.AuthRequest{
+		Email:    "vinicius@teste",
+		Password: "password123",
+	}
+
+	response, err := service.S_Auth(request)
+	assert.Error(t, err)
+	assert.Nil(t, response)
+
+	mockCustomerRepo.AssertExpectations(t)
+}
+
 // Teste para S_Get
 func TestCustomerService_S_Get(t *testing.T) {
 	mockCustomerRepo := &MockCustomerRepository{}
