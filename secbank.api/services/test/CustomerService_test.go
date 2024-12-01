@@ -220,8 +220,59 @@ func TestCustomerService_S_Auth_Success(t *testing.T) {
 	mockCustomerRepo.AssertExpectations(t)
 }
 
+func TestCustomerService_S_Auth_Success2(t *testing.T) {
+	mockCustomerRepo := &MockCustomerRepository{}
+
+	mockCustomerRepo.On("R_Get_By_Email", "test@example.com").Return(&models.Customer{
+		ID:       1,
+		Email:    "test@example.com",
+		Password: "password123",
+	}, nil)
+
+	service := services.CustomerService{
+		ICustomerRepository: mockCustomerRepo,
+	}
+
+	request := dto2.AuthRequest{
+		Email:    "test@example.com",
+		Password: "password123",
+	}
+
+	response, err := service.S_Auth(request)
+	assert.NoError(t, err)
+	assert.NotNil(t, response)
+	assert.NotEmpty(t, response.Token)
+
+	mockCustomerRepo.AssertExpectations(t)
+}
+
 // Teste para S_Auth com senha inválida
 func TestCustomerService_S_Auth_InvalidPassword(t *testing.T) {
+	mockCustomerRepo := &MockCustomerRepository{}
+
+	mockCustomerRepo.On("R_Get_By_Email", "test@example.com").Return(&models.Customer{
+		ID:       1,
+		Email:    "test@example.com",
+		Password: "wrongpassword",
+	}, nil)
+
+	service := services.CustomerService{
+		ICustomerRepository: mockCustomerRepo,
+	}
+
+	request := dto2.AuthRequest{
+		Email:    "test@example.com",
+		Password: "password123",
+	}
+
+	response, err := service.S_Auth(request)
+	assert.Error(t, err)
+	assert.Nil(t, response)
+
+	mockCustomerRepo.AssertExpectations(t)
+}
+
+func TestCustomerService_S_Auth_InvalidPassword2(t *testing.T) {
 	mockCustomerRepo := &MockCustomerRepository{}
 
 	mockCustomerRepo.On("R_Get_By_Email", "test@example.com").Return(&models.Customer{
