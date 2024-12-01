@@ -35,7 +35,6 @@ const TransferPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'amount') {
-      // Formatando o valor com separador de milhar
       const formattedValue = value.replace(/\D/g, '').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
       setTransferData({ ...transferData, [name]: formattedValue });
     } else {
@@ -58,31 +57,30 @@ const TransferPage = () => {
       toast.error('Token não encontrado!');
       return;
     }
-  
+
     if (!transferData.amount) {
       toast.error('Por favor, insira um valor para o montante.');
       return;
     }
-  
+
     const formData = new FormData();
     formData.append('DigitCreditAccount', transferData.digitCreditAccount);
     formData.append('NumberCreditAccount', transferData.numberCreditAccount);
-    // Remover vírgulas antes de enviar o valor para o backend
     const formattedAmount = transferData.amount.replace(/\D/g, '');
     formData.append('Amount', formattedAmount);
-  
+
     try {
       const responseBlob = await fetch(photo);
       const blob = await responseBlob.blob();
       formData.append('file', blob, 'photo.jpg');
-  
+
       const response = await api.post('/transaction', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
-  
+
       if (response.ok) {
         toast.success('Transferência realizada com sucesso!');
         navigate('/extract');
@@ -90,11 +88,16 @@ const TransferPage = () => {
         toast.error('Erro ao realizar a transferência.');
       }
     } catch (error) {
-      const errorMessage = JSON.parse(error.message)?.messageError || 'Erro inesperado.';
+      const errorMessage = (() => {
+        try {
+          return JSON.parse(error.message)?.messageError || 'Erro inesperado.';
+        } catch {
+          return 'Erro inesperado.';
+        }
+      })();
       toast.error(errorMessage);
     }
   };
-  
 
   const renderStepContent = (step) => {
     switch (step) {
@@ -106,15 +109,16 @@ const TransferPage = () => {
             fullWidth
             margin="normal"
             name="amount"
-            value={`R$ ${transferData.amount}`} // Adicionando o símbolo de real
+            value={`R$ ${transferData.amount}`}
             onChange={handleChange}
             type="text"
             required
+            data-testid="amount-field"
           />
         );
       case 1:
         return (
-          <Grid container spacing={2}>
+          <Grid container spacing={2} data-testid="destination-account-step">
             <Grid item xs={9}>
               <TextField
                 label="Número da Conta de Destino"
@@ -126,6 +130,7 @@ const TransferPage = () => {
                 onChange={handleChange}
                 inputProps={{ maxLength: 7 }}
                 required
+                data-testid="number-field"
               />
             </Grid>
             <Grid item xs={3}>
@@ -139,13 +144,14 @@ const TransferPage = () => {
                 onChange={handleChange}
                 inputProps={{ maxLength: 1 }}
                 required
+                data-testid="digit-field"
               />
             </Grid>
           </Grid>
         );
       case 2:
         return (
-          <Box>
+          <Box data-testid="summary-step">
             <Typography variant="h6" gutterBottom>
               Resumo da Transferência
             </Typography>
@@ -159,12 +165,12 @@ const TransferPage = () => {
         );
       case 3:
         return (
-          <Box textAlign="center">
+          <Box textAlign="center" data-testid="identity-step">
             <Typography
               variant="h6"
               gutterBottom
               sx={{
-                color: '#303f9f', // Cor azul predominante
+                color: '#303f9f',
                 fontWeight: 'bold',
                 mb: 2,
               }}
@@ -178,9 +184,15 @@ const TransferPage = () => {
                   ref={webcamRef}
                   screenshotFormat="image/jpeg"
                   width="100%"
+                  data-testid="webcam"
                 />
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  <Button variant="contained" color="primary" onClick={handleCapture}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }} data-testid="box-capture-photo-button">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleCapture}
+                    data-testid="capture-photo-button"
+                  >
                     Tirar Foto
                   </Button>
                 </Box>
@@ -190,16 +202,26 @@ const TransferPage = () => {
                 <Typography
                   variant="h5"
                   sx={{
-                    color: '#303f9f', // Cor azul predominante
+                    color: '#303f9f',
                     fontWeight: 'bold',
                     mb: 2,
                   }}
                 >
                   Foto Capturada
                 </Typography>
-                <img src={photo} alt="Foto capturada" style={{ width: '100%', maxWidth: '300px' }} />
+                <img
+                  src={photo}
+                  alt="Foto capturada"
+                  style={{ width: '100%', maxWidth: '300px' }}
+                  data-testid="captured-photo"
+                />
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-                  <Button variant="contained" color="secondary" onClick={handleRetake}>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleRetake}
+                    data-testid="retake-photo-button"
+                  >
                     Nova Tentativa
                   </Button>
                 </Box>
@@ -223,23 +245,13 @@ const TransferPage = () => {
         backgroundColor: '#f5f5f5',
       }}
     >
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <ToastContainer />
       <Navbar />
       <Sidebar />
-      <Paper sx={{ p: 4, maxWidth: 600 }}>
+      <Paper sx={{ p: 4, maxWidth: 600 }} data-testid="transfer-page">
         <Stepper activeStep={activeStep} alternativeLabel>
           {steps.map((label, index) => (
-            <Step key={index}>
+            <Step key={index} data-testid={`step-${index}`}>
               <StepLabel>{label}</StepLabel>
             </Step>
           ))}
@@ -250,16 +262,26 @@ const TransferPage = () => {
 
           <Box sx={{ mt: 3 }}>
             {activeStep > 0 && (
-              <Button onClick={handleBack} sx={{ mr: 1 }}>
+              <Button onClick={handleBack} sx={{ mr: 1 }} data-testid="back-button">
                 Voltar
               </Button>
             )}
             {activeStep < steps.length - 1 ? (
-              <Button variant="contained" color="primary" onClick={handleNext}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleNext}
+                data-testid="next-button"
+              >
                 Próximo
               </Button>
             ) : (
-              <Button variant="contained" color="primary" onClick={handleConfirm}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleConfirm}
+                data-testid="confirm-transfer-button"
+              >
                 Confirmar Transferência
               </Button>
             )}
