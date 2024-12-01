@@ -23,11 +23,6 @@ func (c Customer) Validate() error {
 		return errors.New("o nome completo deve conter pelo menos 3 caracteres")
 	}
 
-	phoneRegex := regexp.MustCompile(`^\+?[1-9]\d{1,14}$`)
-	if !phoneRegex.MatchString(c.Phone) {
-		return errors.New("o telefone não é válido. Deve incluir o código do país e conter apenas números")
-	}
-
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$`)
 	if !emailRegex.MatchString(c.Email) {
 		return errors.New("o email não é válido")
