@@ -5,6 +5,7 @@ import {
 import { styled } from '@mui/system';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import api from '../api/axiosBase';
@@ -30,6 +31,7 @@ const Extract = () => {
   const [transactions, setTransactions] = useState([]);
   const [totalBalance, setTotalBalance] = useState(0);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchExtractData = async () => {
@@ -140,7 +142,13 @@ const Extract = () => {
           </Table>
         </TableContainer>
 
-        <Button variant="contained" color="primary" fullWidth sx={{ mt: 3 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          sx={{ mt: 3 }}
+          onClick={() => navigate('/home')} // Navegação para a rota /home
+        >
           Voltar ao Dashboard
         </Button>
       </TransactionsPaper>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import InputMask from 'react-input-mask';
 import {
-  Button, TextField, Typography, Paper, Box, InputAdornment,
+  Button, TextField, Typography, Paper, Box,
 } from '@mui/material';
 import { styled } from '@mui/system';
-import { isValidPhoneNumber } from 'libphonenumber-js';
 import dayjs from 'dayjs';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
@@ -84,23 +84,15 @@ const UserProfileEdit = () => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
 
-  const validatePhone = (phone) => isValidPhoneNumber(phone, 'BR');
-
-  const isUnderage = (date) => {
-    const today = dayjs();
-    const birthDate = dayjs(date);
-    return today.diff(birthDate, 'year') < 18;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
-    if (!validatePhone(userData.phone)) {
+    if (!userData.phone.replace(/\D/g, '').match(/^\d{10,11}$/)) {
       newErrors.phone = 'Número de telefone inválido!';
     }
 
-    if (isUnderage(userData.birthDate)) {
+    if (dayjs().diff(dayjs(userData.birthDate), 'year') < 18) {
       newErrors.birthDate = 'Usuário deve ser maior de idade!';
     }
 
@@ -116,7 +108,7 @@ const UserProfileEdit = () => {
       const requestData = {
         ID: userData.id,
         FullName: userData.name,
-        Phone: userData.phone,
+        Phone: userData.phone.replace(/\D/g, ''), // Remove máscara
         Email: userData.email,
         Birthday: new Date(userData.birthDate).toISOString(),
         CreatedTimeStamp: userData.createdTimeStamp,
@@ -178,31 +170,37 @@ const UserProfileEdit = () => {
               readOnly: true,
             }}
           />
-          <ReadOnlyTextField
-            label="CPF"
-            variant="outlined"
-            fullWidth
-            margin="normal"
+          <InputMask
+            mask="999.999.999-99"
             value={userData.cpf}
-            InputProps={{
-              readOnly: true,
-            }}
-          />
-          <TextField
-            label="Telefone"
-            name="phone"
-            variant="outlined"
-            fullWidth
-            margin="normal"
+            disabled
+          >
+            {() => (
+              <ReadOnlyTextField
+                label="CPF"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+              />
+            )}
+          </InputMask>
+          <InputMask
+            mask="(99) 99999-9999"
             value={userData.phone}
-            onChange={handleChange}
-            InputProps={{
-              startAdornment: <InputAdornment position="start">+55</InputAdornment>,
-              placeholder: '(XX) XXXXX-XXXX',
-            }}
-            error={!!errors.phone}
-            helperText={errors.phone}
-          />
+            onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
+          >
+            {() => (
+              <TextField
+                label="Telefone"
+                name="phone"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                error={!!errors.phone}
+                helperText={errors.phone}
+              />
+            )}
+          </InputMask>
           <TextField
             label="Data de Nascimento"
             name="birthDate"

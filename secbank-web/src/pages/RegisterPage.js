@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
+import InputMask from 'react-input-mask';
 import { Button, TextField, Box, Typography, Paper } from '@mui/material';
 import { styled } from '@mui/system';
 import { toast, ToastContainer } from 'react-toastify';
@@ -103,11 +104,11 @@ const RegisterPage = () => {
 
     const formData = new FormData();
     formData.append('FullName', fullName);
-    formData.append('Phone', phone);
+    formData.append('Phone', phone.replace(/\D/g, '')); // Remove máscara
     formData.append('Email', email);
     formData.append('Birthday', new Date(birthday).toISOString());
     formData.append('Password', password);
-    formData.append('Document', document);
+    formData.append('Document', document.replace(/\D/g, '')); // Remove máscara
     formData.append('file', photo);
 
     try {
@@ -153,7 +154,8 @@ const RegisterPage = () => {
         toast.error('Erro ao realizar login. Verifique suas credenciais.');
       }
     } catch (error) {
-      const errorMessage = JSON.parse(error.message).messageError || 'Erro ao realizar login';
+      const errorMessage =
+        JSON.parse(error.message).messageError || 'Erro ao realizar login';
       toast.error(errorMessage);
     }
   };
@@ -188,17 +190,23 @@ const RegisterPage = () => {
                 style: { borderRadius: '10px' },
               }}
             />
-            <TextField
-              label="Telefone"
-              variant="outlined"
-              fullWidth
-              margin="normal"
+            <InputMask
+              mask="(99) 99999-9999"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              InputProps={{
-                style: { borderRadius: '10px' },
-              }}
-            />
+            >
+              {() => (
+                <TextField
+                  label="Telefone"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  InputProps={{
+                    style: { borderRadius: '10px' },
+                  }}
+                />
+              )}
+            </InputMask>
             <TextField
               label="Email"
               variant="outlined"
@@ -210,17 +218,23 @@ const RegisterPage = () => {
                 style: { borderRadius: '10px' },
               }}
             />
-            <TextField
-              label="Documento"
-              variant="outlined"
-              fullWidth
-              margin="normal"
+            <InputMask
+              mask="999.999.999-99"
               value={document}
               onChange={(e) => setDocument(e.target.value)}
-              InputProps={{
-                style: { borderRadius: '10px' },
-              }}
-            />
+            >
+              {() => (
+                <TextField
+                  label="CPF"
+                  variant="outlined"
+                  fullWidth
+                  margin="normal"
+                  InputProps={{
+                    style: { borderRadius: '10px' },
+                  }}
+                />
+              )}
+            </InputMask>
             <TextField
               label="Senha"
               variant="outlined"

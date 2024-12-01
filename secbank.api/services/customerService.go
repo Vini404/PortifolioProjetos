@@ -108,7 +108,7 @@ func (service *CustomerService) createAccountAndBalance(customerID int) error {
 		IsActive:         true,
 		IDAccountHolder:  holderID,
 		Number:           strconv.Itoa(generate7DigitNumber()),
-		Digit:            strconv.Itoa(holderID),
+		Digit:            truncateToOneDigit(holderID),
 	}
 
 	accountID, err := service.IAccountRepository.R_Create(account)
@@ -158,4 +158,13 @@ func getFileBytes(file multipart.File) ([]byte, error) {
 	var buf bytes.Buffer
 	_, err := io.Copy(&buf, file)
 	return buf.Bytes(), err
+}
+
+func truncateToOneDigit(holderID int) string {
+	idStr := strconv.Itoa(holderID)
+
+	if len(idStr) > 1 {
+		return idStr[:1]
+	}
+	return idStr
 }
