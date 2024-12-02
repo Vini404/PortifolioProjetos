@@ -10,7 +10,7 @@
 1. Clone o repositório:
    ```bash
    git clone https://github.com/Vini404/PortifolioProjetos.git
-   cd PortifolioProjetos
+   cd PortifolioProjetos/secbank.api
    ```
 
 2. Configure as variáveis de ambiente no arquivo `.env`:
@@ -24,8 +24,13 @@
     DB_SCHEMA=public
     JWT_SECRET=<YOUR SECRET JWT>
    ```
+3. Baixe as dependencias necessarias:
+   ```bash
+   go mod tidy
+   ```
+---
 
-3. Execute o projeto localmente:
+4. Execute o projeto localmente:
    ```bash
    go run main.go
    ```
