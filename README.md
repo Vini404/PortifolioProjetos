@@ -4,7 +4,7 @@ Resumo do Projeto
 
 Este projeto é um sistema financeiro desenvolvido em GoLang, projetado para operar em um banco virtual com autenticação por reconhecimento facial. Ele permite gerenciar contas, realizar transferências internas e consultar saldos e extratos, garantindo segurança e praticidade nas transações financeiras.
 
-A arquitetura é baseada em microserviços, utilizando tecnologias modernas e serviços da AWS para escalabilidade e confiabilidade.
+A arquitetura é baseada em um monolito centralizado, utilizando tecnologias modernas e serviços da AWS para oferecer confiabilidade, simplicidade e eficiência no gerenciamento das operações financeiras.
 
 **Requisitos funcionais do projeto**
 - Abertura de contas.
