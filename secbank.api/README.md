@@ -1,49 +1,55 @@
-# Project secbank.api
+## Requisitos
 
-One Paragraph of project description goes here
+- **Go** 1.20+
+- Banco de dados **PostgreSQL**
 
-## Getting Started
+---
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+## Como Rodar o Projeto
 
-## MakeFile
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/Vini404/PortifolioProjetos.git
+   cd PortifolioProjetos
+   ```
 
-run all make commands with clean tests
-```bash
-make all build
-```
+2. Configure as variáveis de ambiente no arquivo `.env`:
+   ```bash
+    PORT=8080
+    DB_HOST="HOST URL"
+    DB_PORT=5432
+    DB_DATABASE=postgres
+    DB_USERNAME=postgres
+    DB_PASSWORD=YOUR_PASSWORD
+    DB_SCHEMA=public
+    JWT_SECRET=<YOUR SECRET JWT>
+   ```
 
-build the application
-```bash
-make build
-```
+3. Execute o projeto localmente:
+   ```bash
+   go run main.go
+   ```
+---
 
-run the application
-```bash
-make run
-```
+## Contribuição
 
-Create DB container
-```bash
-make docker-run
-```
+1. Faça um **fork** do repositório.
+2. Crie um branch para sua feature/bugfix:
+   ```bash
+   git checkout -b minha-feature
+   ```
+3. Faça o commit de suas alterações:
+   ```bash
+   git commit -m "Descrição da alteração"
+   ```
+4. Envie as alterações para o repositório remoto:
+   ```bash
+   git push origin minha-feature
+   ```
+5. Crie um **pull request** explicando suas alterações.
 
-Shutdown DB container
-```bash
-make docker-down
-```
+---
 
-live reload the application
-```bash
-make watch
-```
+## Contato
 
-run the test suite
-```bash
-make test
-```
-
-clean up binary from the last build
-```bash
-make clean
-```
+Para dúvidas ou sugestões, entre em contato pelo e-mail: **vinicius404contato@gmail.com**.
