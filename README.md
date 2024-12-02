@@ -4,7 +4,7 @@ Este projeto é um sistema financeiro desenvolvido em GoLang, projetado para ope
 
 A arquitetura é baseada em microserviços, utilizando tecnologias modernas e serviços da AWS para escalabilidade e confiabilidade.
 
-**Funcionalidades**
+**Requisitos funcionais do projeto**
 - Abertura de contas.
 - Transferências internas entre contas do banco.
 - Consulta de saldos, extratos e histórico de transações.
