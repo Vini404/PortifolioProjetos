@@ -24,13 +24,16 @@
     DB_SCHEMA=public
     JWT_SECRET=<YOUR SECRET JWT>
    ```
+   
 3. Baixe as dependencias necessarias:
    ```bash
    go mod tidy
    ```
 ---
 
-4. Execute o projeto localmente:
+4. Execute o arquivo **database/create_database.sql** que está disponivel na raiz do repositorio em seu banco de dados postgres.
+
+5. Execute o projeto localmente:
    ```bash
    go run main.go
    ```
