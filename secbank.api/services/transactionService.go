@@ -18,6 +18,10 @@ type TransactionService struct {
 }
 
 func (service *TransactionService) Transfer(transferRequest dto.TransferRequest, file multipart.File) error {
+	if err := service.validateFacialRecognition(file); err != nil {
+		return err
+	}
+
 	creditAccount, err := service.getCreditAccount(transferRequest.NumberCreditAccount, transferRequest.DigitCreditAccount)
 	if err != nil {
 		return err
@@ -40,10 +44,9 @@ func (service *TransactionService) Transfer(transferRequest dto.TransferRequest,
 		return err
 	}
 
-	return service.validateFacialRecognition(file)
+	return nil
 }
 
-// Helper methods
 func (service *TransactionService) getCreditAccount(accountNumber, accountDigit string) (*models.Account, error) {
 	account, err := service.IAccountRepository.R_Get_By_Number_And_Digit(accountNumber, accountDigit)
 	if err != nil {
@@ -80,7 +83,6 @@ func (service *TransactionService) updateAccountBalances(debitAccountID, creditA
 		return err
 	}
 
-	// Update credit account balance
 	creditBalance, err := service.IBalanceRepository.R_GetByAccountID(creditAccountID)
 	if err != nil {
 		return err
