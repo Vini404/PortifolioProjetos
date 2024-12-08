@@ -31,7 +31,7 @@ func (repository *BalanceRepository) R_Extract(accountID int) ([]*dto.ExtractRes
 			inner join accountholder ah on ah.id = a.idaccountholder 
 			inner join customer c on c.id  = ah.idcustomer 
 			where t.iddebitaccount = $1
-			union
+			union all
 			select t2.description as operation_name, t2.amount,concat('Recebido de ',c.fullname,' - Conta ',a.number,'-',a.digit) as transfer_type from transactions t2 
 			inner join account a on a.id = t2.iddebitaccount
 			inner join accountholder ah on ah.id = a.idaccountholder 
