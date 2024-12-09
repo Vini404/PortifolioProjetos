@@ -56,7 +56,6 @@ jobs:
             -Dsonar.projectKey=Vini404_PortifolioProjetos_Frontend
             -Dsonar.organization=vini404
             -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.branch.name=${{ github.ref_name }}
             -Dsonar.sources=src/pages
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.coverage.exclusions=**/*.test.js,**/__mocks__/**
