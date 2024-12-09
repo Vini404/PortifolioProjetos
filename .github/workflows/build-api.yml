@@ -51,7 +51,7 @@ jobs:
         with:
           projectBaseDir: ./secbank.api
           args: >
-            -Dsonar.projectKey=Vini404_PortifolioProjetos
+            -Dsonar.projectKey=Vini404_PortifolioProjetos_Backend
             -Dsonar.organization=vini404
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.go.coverage.reportPaths=coverage.out

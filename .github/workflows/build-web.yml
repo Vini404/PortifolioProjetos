@@ -53,7 +53,7 @@ jobs:
         with:
           projectBaseDir: ./secbank-web
           args: >
-            -Dsonar.projectKey=Vini404_PortifolioProjetos
+            -Dsonar.projectKey=Vini404_PortifolioProjetos_Frontend
             -Dsonar.organization=vini404
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.branch.name=${{ github.ref_name }}
